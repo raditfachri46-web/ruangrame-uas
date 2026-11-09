@@ -1,0 +1,28 @@
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Kategori {
+  id        Int      @id @default(autoincrement())
+  nama      String   @unique
+  slug      String   @unique
+  threads   Thread[]
+}
+
+model Thread {
+  id           Int      @id @default(autoincrement())
+  judul        String
+  konten       String
+  penulis      String
+  views        Int      @default(0)
+  createdAt    DateTime @default(now())
+  
+  kategoriId   Int
+  kategori     Kategori @relation(fields: [kategoriId], references: [id])
+}
