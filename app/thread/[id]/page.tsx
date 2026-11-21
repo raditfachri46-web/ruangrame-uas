@@ -70,7 +70,7 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
         </Link>
         <span>/</span>
         <Link
-          href={`/search?kategori=${encodeURIComponent(thread.kategori.slug)}`}
+          href={`/kategori/${encodeURIComponent(thread.kategori.slug)}`}
           className="hover:text-white transition-colors shrink-0"
         >
           {thread.kategori.nama}
@@ -81,7 +81,7 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
 
       <article className="backdrop-blur-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/[0.09] border-t-white/20 rounded-3xl p-6 sm:p-9 shadow-2xl">
         <Link
-          href={`/search?kategori=${encodeURIComponent(thread.kategori.slug)}`}
+          href={`/kategori/${encodeURIComponent(thread.kategori.slug)}`}
           className="inline-block px-3 py-1 rounded-xl bg-fuchsia-500/15 text-fuchsia-300 text-xs font-semibold border border-fuchsia-400/25 hover:bg-fuchsia-500/25 transition-colors"
         >
           # {thread.kategori.nama}
