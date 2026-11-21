@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 
 async function ForumContent() {
@@ -28,16 +29,31 @@ async function ForumContent() {
       {/* Glass Navbar */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#09080f]/75 border-b border-white/[0.09] shadow-2xl">
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center space-x-3.5">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-amber-400 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-violet-500/25 border border-white/25">
+          <Link href="/" className="flex items-center space-x-3.5 group">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-amber-400 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-violet-500/25 border border-white/25 group-hover:scale-105 transition-transform">
               R
             </div>
             <span className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-white via-violet-100 to-fuchsia-300 bg-clip-text text-transparent">
               RuangRame
             </span>
-          </div>
+          </Link>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <nav className="hidden md:flex items-center gap-2 text-xs font-semibold">
+              <Link
+                href="/"
+                className="px-3.5 py-2 rounded-full bg-violet-500/20 text-violet-200 border border-violet-400/30"
+              >
+                Beranda
+              </Link>
+              <Link
+                href="/kategori"
+                className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all"
+              >
+                Kategori
+              </Link>
+            </nav>
+
             <div
               className={`flex items-center space-x-2.5 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border shadow-inner ${
                 isConnected
@@ -63,25 +79,42 @@ async function ForumContent() {
         {/* Left Sidebar: Glass Categories */}
         <aside className="lg:col-span-1 space-y-6">
           <div className="backdrop-blur-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/[0.09] border-t-white/20 rounded-3xl p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.45)]">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-fuchsia-300 mb-5 flex items-center gap-2">
-              📂 Kategori Populer
-            </h3>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-fuchsia-300 flex items-center gap-2">
+                📂 Kategori Populer
+              </h3>
+              <Link
+                href="/kategori"
+                className="text-[11px] font-semibold text-violet-300 hover:text-amber-300 transition-colors"
+              >
+                Semua &rarr;
+              </Link>
+            </div>
+
             <div className="space-y-2">
               {categories.length > 0 ? (
                 categories.map((cat) => (
-                  <a
+                  <Link
                     key={cat.id}
-                    href={`#${cat.slug}`}
+                    href={`/kategori/${cat.slug}`}
                     className="flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-medium text-slate-300 hover:text-white hover:bg-violet-500/10 transition-all group border border-transparent hover:border-violet-400/25"
                   >
                     <span># {cat.nama}</span>
                     <span className="text-[10px] px-2.5 py-1 rounded-full bg-violet-500/15 text-violet-300 border border-violet-400/25 group-hover:bg-fuchsia-500/20 group-hover:text-fuchsia-200 transition-colors">
                       Hot
                     </span>
-                  </a>
+                  </Link>
                 ))
               ) : (
-                <p className="text-sm text-slate-500 italic py-2">Belum ada kategori.</p>
+                <div className="space-y-3 py-2">
+                  <p className="text-sm text-slate-500 italic">Belum ada kategori.</p>
+                  <Link
+                    href="/kategori"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-violet-300 hover:text-fuchsia-300 transition-colors"
+                  >
+                    Buka halaman sub-forum &rarr;
+                  </Link>
+                </div>
               )}
             </div>
           </div>
@@ -109,10 +142,16 @@ async function ForumContent() {
               <p className="text-sm sm:text-base text-slate-300/85 leading-relaxed mb-6">
                 Wadah kolaborasi anak kuliah untuk nanya tugas, diskusi seputar mata kuliah, hingga berbagi info penting seputar kampus.
               </p>
-              <div>
+              <div className="flex flex-wrap items-center gap-3">
                 <button className="px-6 py-3 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-rose-400 text-white font-semibold text-sm shadow-lg shadow-fuchsia-600/30 transition-all transform active:scale-95 border border-white/25">
                   + Buat Diskusi Baru
                 </button>
+                <Link
+                  href="/kategori"
+                  className="px-5 py-3 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-200 hover:text-white font-semibold text-sm border border-white/15 backdrop-blur-md transition-all"
+                >
+                  📂 Jelajahi Kategori
+                </Link>
               </div>
             </div>
           </div>
