@@ -7,10 +7,13 @@ export const BATAS = {
   kontenMax: 5000,
   penulisMin: 2,
   penulisMax: 40,
+  gambarMaxBytes: 3 * 1024 * 1024, // 3 MB
 } as const
 
+export const TIPE_GAMBAR = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const
+
 export type FieldThread = 'judul' | 'konten' | 'penulis' | 'kategoriId'
-export type ThreadErrors = Partial<Record<FieldThread | 'form', string>>
+export type ThreadErrors = Partial<Record<FieldThread | 'form' | 'gambar', string>>
 
 export type ThreadInput = {
   judul: string
@@ -65,4 +68,18 @@ export function validasiThread(input: ThreadInput): {
 
   if (Object.keys(errors).length > 0) return { errors, data: null }
   return { errors: {}, data: { judul, konten, penulis, kategoriId } }
+}
+
+// Validasi file gambar. Dipakai di browser (cepat) dan di server action (wajib).
+// Pengecekan isi file yang sebenarnya (magic bytes) ada di lib/storage.ts.
+export function validasiFileGambar(file: File | null | undefined): string | null {
+  if (!file || file.size === 0) return null // gambar bersifat opsional
+  if (!(TIPE_GAMBAR as readonly string[]).includes(file.type)) {
+    return 'Gambar harus berformat JPG, PNG, WebP, atau GIF.'
+  }
+  if (file.size > BATAS.gambarMaxBytes) {
+    const mb = BATAS.gambarMaxBytes / (1024 * 1024)
+    return `Ukuran gambar maksimal ${mb} MB.`
+  }
+  return null
 }

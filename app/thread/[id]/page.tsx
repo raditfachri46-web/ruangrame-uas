@@ -113,6 +113,24 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
 
         <KontenTeks teks={thread.konten} />
 
+        {thread.gambarUrl && (
+          <a
+            href={thread.gambarUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 block"
+            aria-label="Buka gambar ukuran penuh"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={thread.gambarUrl}
+              alt={`Gambar lampiran untuk diskusi: ${thread.judul}`}
+              loading="lazy"
+              className="max-h-[32rem] w-auto max-w-full rounded-2xl border border-white/[0.1]"
+            />
+          </a>
+        )}
+
         <div className="mt-8 pt-6 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/"

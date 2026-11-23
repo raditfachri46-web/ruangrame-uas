@@ -11,6 +11,13 @@ function konfigurasi() {
   return { url, kunci }
 }
 
+// Kunci baru (sb_secret_...) bukan JWT: cukup dikirim lewat header apikey
+function headerAuth(kunci: string): Record<string, string> {
+  return kunci.startsWith('eyJ')
+    ? { Authorization: `Bearer ${kunci}`, apikey: kunci }
+    : { apikey: kunci }
+}
+
 // Cek isi file yang sebenarnya (bukan cuma ekstensi / tipe dari browser)
 function deteksiTipe(b: Uint8Array): { mime: string; ext: string } | null {
   const sama = (awal: number[], offset = 0) => awal.every((nilai, i) => b[offset + i] === nilai)
@@ -42,8 +49,7 @@ export async function unggahGambar(file: File): Promise<HasilUnggah> {
     const res = await fetch(`${cfg.url}/storage/v1/object/${BUCKET}/${path}`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${cfg.kunci}`,
-        apikey: cfg.kunci,
+        ...headerAuth(cfg.kunci),
         'Content-Type': tipe.mime,
         'Cache-Control': 'max-age=31536000',
         'x-upsert': 'false',
@@ -68,7 +74,7 @@ export async function hapusGambar(path: string): Promise<void> {
   try {
     await fetch(`${cfg.url}/storage/v1/object/${BUCKET}/${path}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${cfg.kunci}`, apikey: cfg.kunci },
+      headers: headerAuth(cfg.kunci),
       signal: AbortSignal.timeout(10000),
     })
   } catch {
