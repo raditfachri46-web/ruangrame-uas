@@ -7,6 +7,7 @@ import { buatThread } from '@/app/buat-thread/actions'
 import { KontenTeks } from '@/components/KontenTeks'
 import {
   BATAS,
+  validasiFileGambar,
   validasiThread,
   type FieldThread,
   type FormState,
@@ -20,6 +21,9 @@ const KUNCI_PENULIS = 'rr-nama-penulis'
 const URUTAN_FIELD: FieldThread[] = ['judul', 'kategoriId', 'konten', 'penulis']
 
 const teks = (nilai: unknown): string => (typeof nilai === 'string' ? nilai : '')
+
+const formatUkuran = (bytes: number): string =>
+  bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.round(bytes / 1024)} KB`
 
 function Penghitung({ nilai, maks }: { nilai: number; maks: number }) {
   const hampir = nilai >= maks * 0.9
@@ -57,6 +61,39 @@ export function ThreadForm({
   const [mode, setMode] = useState<'tulis' | 'pratinjau'>('tulis')
   const [draftDipulihkan, setDraftDipulihkan] = useState(false)
   const siapSimpan = useRef(false)
+
+  // Gambar (opsional). File tidak bisa disimpan di draf localStorage, jadi dipisah dari `values`.
+  const inputGambar = useRef<HTMLInputElement>(null)
+  const [gambar, setGambar] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [errorGambarKlien, setErrorGambarKlien] = useState<string | null>(null)
+  const [stateGambarDiubah, setStateGambarDiubah] = useState<FormState | null>(null)
+
+  // Buat & bersihkan URL pratinjau gambar
+  useEffect(() => {
+    if (!gambar) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPreviewUrl(null)
+      return
+    }
+    const url = URL.createObjectURL(gambar)
+    setPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [gambar])
+
+  // React mengosongkan input file setelah form dikirim. Kalau server menolak (ada error),
+  // kembalikan file yang tadi dipilih supaya pengguna tidak perlu memilih ulang.
+  useEffect(() => {
+    if (!gambar || !inputGambar.current) return
+    try {
+      const dt = new DataTransfer()
+      dt.items.add(gambar)
+      inputGambar.current.files = dt.files
+    } catch {
+      // browser tidak mendukung: pengguna pilih ulang saja
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state])
 
   // Pulihkan draft & nama penulis dari localStorage (hanya sekali saat halaman dibuka)
   useEffect(() => {
@@ -115,8 +152,37 @@ export function ThreadForm({
     }
   const sentuh = (field: FieldThread) => () => setTersentuh((t) => ({ ...t, [field]: true }))
 
+  function saatPilihGambar(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null
+    setStateGambarDiubah(state) // sembunyikan error gambar lama dari server
+    const masalah = validasiFileGambar(file)
+    if (masalah) {
+      e.target.value = '' // file bermasalah tidak ikut terkirim
+      setGambar(null)
+      setErrorGambarKlien(masalah)
+      return
+    }
+    setErrorGambarKlien(null)
+    setGambar(file)
+  }
+
+  function hapusGambar() {
+    if (inputGambar.current) inputGambar.current.value = ''
+    setGambar(null)
+    setErrorGambarKlien(null)
+    setStateGambarDiubah(state)
+  }
+
+  const pesanGambar =
+    errorGambarKlien ?? (stateGambarDiubah === state ? undefined : state.errors.gambar)
+
   function saatKirim(e: FormEvent<HTMLFormElement>) {
     setSudahCobaKirim(true)
+    if (errorGambarKlien) {
+      e.preventDefault()
+      inputGambar.current?.focus()
+      return
+    }
     const bermasalah = URUTAN_FIELD.find((f) => errorKlien[f])
     if (bermasalah) {
       e.preventDefault() // batalkan kirim, fokus ke kolom yang salah
@@ -282,6 +348,14 @@ export function ThreadForm({
                     {values.judul || '(Belum ada judul)'}
                   </h3>
                   <KontenTeks teks={values.konten || '(Belum ada isi)'} />
+                  {previewUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={previewUrl}
+                      alt="Pratinjau gambar lampiran"
+                      className="mt-4 max-h-96 w-auto max-w-full rounded-2xl border border-white/[0.1]"
+                    />
+                  )}
                 </>
               ) : (
                 <p className="text-sm text-slate-500 italic">Belum ada yang bisa dipratinjau.</p>
@@ -289,6 +363,49 @@ export function ThreadForm({
             </div>
           )}
           <PesanError id="err-konten" pesan={pesan('konten')} />
+        </div>
+
+        {/* Gambar (opsional) */}
+        <div>
+          <label htmlFor="field-gambar" className="block text-sm font-semibold text-slate-200 mb-2">
+            Gambar <span className="font-normal text-slate-500">(opsional)</span>
+          </label>
+          <input
+            ref={inputGambar}
+            id="field-gambar"
+            name="gambar"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            onChange={saatPilihGambar}
+            aria-invalid={Boolean(pesanGambar)}
+            aria-describedby="err-gambar info-gambar"
+            className="block w-full text-sm text-slate-300 file:mr-4 file:cursor-pointer file:rounded-xl file:border file:border-white/[0.15] file:bg-white/[0.07] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-white/[0.12] rounded-2xl bg-white/[0.03] border border-dashed border-white/[0.15] p-3"
+          />
+          <p id="info-gambar" className="mt-1.5 text-[11px] text-slate-500">
+            JPG, PNG, WebP, atau GIF. Maksimal {BATAS.gambarMaxBytes / (1024 * 1024)} MB.
+          </p>
+          <PesanError id="err-gambar" pesan={pesanGambar} />
+          {gambar && previewUrl && (
+            <div className="mt-3 flex items-start gap-4 rounded-2xl bg-black/20 border border-white/[0.1] p-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewUrl}
+                alt="Pratinjau gambar yang dipilih"
+                className="h-24 w-24 shrink-0 rounded-xl object-cover border border-white/[0.1]"
+              />
+              <div className="min-w-0 flex-1 text-xs text-slate-300">
+                <p className="truncate font-semibold text-white">{gambar.name}</p>
+                <p className="mt-0.5 text-slate-500">{formatUkuran(gambar.size)}</p>
+                <button
+                  type="button"
+                  onClick={hapusGambar}
+                  className="mt-2 font-semibold text-rose-300 underline hover:text-rose-200"
+                >
+                  Hapus gambar
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Penulis */}
@@ -331,7 +448,7 @@ export function ThreadForm({
             {isPending && (
               <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin"></span>
             )}
-            {isPending ? 'Memposting...' : 'Posting Diskusi'}
+            {isPending ? (gambar ? 'Mengunggah...' : 'Memposting...') : 'Posting Diskusi'}
           </button>
         </div>
       </form>

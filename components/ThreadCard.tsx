@@ -9,6 +9,7 @@ export type ThreadCardData = {
   penulis: string
   views: number
   createdAt: Date
+  gambarUrl?: string | null
   kategori: { nama: string } | null
 }
 
@@ -37,6 +38,16 @@ export function ThreadCard({
       <p className="text-sm text-slate-400 leading-relaxed mb-4 break-words">
         <Highlight teks={ambilCuplikan(thread.konten, kataKunci)} kataKunci={kataKunci} />
       </p>
+
+      {thread.gambarUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={thread.gambarUrl}
+          alt=""
+          loading="lazy"
+          className="mb-4 h-40 w-full rounded-2xl object-cover border border-white/[0.08]"
+        />
+      )}
 
       <div className="flex items-center justify-between pt-4 border-t border-white/[0.07] text-xs text-slate-400">
         <span className="flex items-center gap-2 min-w-0">
