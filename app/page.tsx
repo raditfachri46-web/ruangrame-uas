@@ -1,11 +1,16 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { connection } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ThreadCard } from '@/components/ThreadCard';
+import { logoutUser } from '@/app/actions/auth';
 
 async function ForumContent() {
-  await connection(); // data DB selalu diambil saat request, bukan saat build
+  await connection();
+
+  const cookieStore = await cookies();
+  const currentUser = cookieStore.get('ruangrame_user')?.value;
 
   let categories: { id: number; nama: string; slug: string }[] = [];
   let threads: {
@@ -79,21 +84,50 @@ async function ForumContent() {
             </nav>
 
             <div
-              className={`flex items-center space-x-2.5 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border shadow-inner ${
+              className={`hidden xl:flex items-center space-x-2 px-3.5 py-2 rounded-full text-xs font-semibold backdrop-blur-md border ${
                 isConnected
                   ? 'bg-emerald-500/10 border-emerald-400/30 text-emerald-300'
                   : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
               }`}
             >
               <span
-                className={`w-2.5 h-2.5 rounded-full ${
-                  isConnected
-                    ? 'bg-emerald-400 animate-pulse shadow-[0_0_12px_#34d399]'
-                    : 'bg-rose-400'
+                className={`w-2 h-2 rounded-full ${
+                  isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
                 }`}
-              ></span>
-              <span>{isConnected ? 'Database Connected' : 'Connection Error'}</span>
+              />
+              <span>{isConnected ? 'DB Connected' : 'DB Error'}</span>
             </div>
+
+            {currentUser ? (
+              <div className="flex items-center gap-2">
+                <span className="px-3.5 py-2 rounded-full bg-fuchsia-500/15 border border-fuchsia-400/30 text-xs font-bold text-fuchsia-200">
+                  @{currentUser}
+                </span>
+                <form action={logoutUser}>
+                  <button
+                    type="submit"
+                    className="px-3.5 py-2 rounded-full bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 text-xs font-semibold text-rose-200 transition"
+                  >
+                    Logout
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-xs font-semibold text-white transition"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-xs font-bold text-white shadow-md shadow-fuchsia-600/25 transition hover:opacity-95"
+                >
+                  Daftar
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -155,7 +189,7 @@ async function ForumContent() {
         <section className="lg:col-span-3 space-y-6">
           {/* Glass Hero Banner */}
           <div className="relative overflow-hidden backdrop-blur-2xl bg-gradient-to-br from-violet-950/45 via-fuchsia-950/25 to-zinc-900/50 border border-white/[0.1] border-t-white/25 rounded-3xl p-8 sm:p-10 shadow-2xl">
-            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-fuchsia-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-fuchsia-500/15 rounded-full blur-3xl pointer-events-none" />
             <div className="relative z-10 max-w-xl">
               <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-violet-500/15 border border-violet-400/25 text-violet-200 text-xs font-semibold mb-4 backdrop-blur-md">
                 ✨ Forum Diskusi Kampus
@@ -224,14 +258,13 @@ async function ForumContent() {
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#09080f] text-slate-100 relative overflow-hidden selection:bg-violet-500 selection:text-white">
-      {/* Background Glowing Ambient Orbs */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-600/15 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-rose-500/12 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-600/15 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-rose-500/12 rounded-full blur-[120px] pointer-events-none" />
 
       <Suspense
         fallback={
           <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-slate-400">
-            <div className="w-10 h-10 rounded-2xl border-2 border-violet-500/30 border-t-fuchsia-400 animate-spin"></div>
+            <div className="w-10 h-10 rounded-2xl border-2 border-violet-500/30 border-t-fuchsia-400 animate-spin" />
             <p className="text-sm font-medium tracking-wide">Memuat forum RuangRame...</p>
           </div>
         }

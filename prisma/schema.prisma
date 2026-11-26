@@ -28,3 +28,10 @@ model Thread {
   kategoriId   Int
   kategori     Kategori @relation(fields: [kategoriId], references: [id])
 }
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
