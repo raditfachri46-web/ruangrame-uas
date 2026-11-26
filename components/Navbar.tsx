@@ -13,12 +13,18 @@ export function Navbar({ isConnected }: { isConnected?: boolean }) {
           </span>
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-2 text-xs font-semibold">
+        <nav className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
           <Link href="/" className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
             Beranda
           </Link>
           <Link href="/kategori" className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
             Kategori
+          </Link>
+          <Link href="/tag-popular" className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
+            Tag Populer
+          </Link>
+          <Link href="/trending-topic" className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
+            Trending
           </Link>
         </nav>
 

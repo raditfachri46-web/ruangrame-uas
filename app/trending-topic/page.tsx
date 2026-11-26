@@ -1,27 +1,82 @@
-'use client';
-
-import React from 'react';
+import { Suspense } from 'react';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 interface TrendingItem {
   slug: string;
   label: string;
   count: number;
+  totalViews: number;
 }
 
-const TRENDING_TOPICS: TrendingItem[] = [
-  { slug: 'coding', label: '#Coding', count: 342 },
-  { slug: 'esport', label: '#Esport', count: 289 },
-  { slug: 'startup', label: '#Startup', count: 256 },
-  { slug: 'game', label: '#Game', count: 210 },
-  { slug: 'kuliah', label: '#Kuliah', count: 198 },
-  { slug: 'k-pop', label: '#K-Pop', count: 176 },
-  { slug: 'film-series', label: '#Film & Series', count: 164 },
-  { slug: 'resep', label: '#Resep', count: 143 },
-];
+async function TrendingTopicContent() {
+  await connection();
 
-export default function TrendingTopicPage() {
-  const maxCount = Math.max(...TRENDING_TOPICS.map((t) => t.count));
+  const [categories, threads] = await Promise.all([
+    prisma.kategori.findMany({ orderBy: { id: 'asc' } }),
+    prisma.thread.findMany({
+      select: { kategoriId: true, judul: true, konten: true, views: true },
+    }),
+  ]);
+
+  const catStats = new Map<number, { count: number; totalViews: number }>();
+  const hashtagStats = new Map<string, { label: string; count: number; totalViews: number }>();
+
+  for (const thread of threads) {
+    const prev = catStats.get(thread.kategoriId) ?? { count: 0, totalViews: 0 };
+    catStats.set(thread.kategoriId, {
+      count: prev.count + 1,
+      totalViews: prev.totalViews + thread.views,
+    });
+
+    const combinedText = `${thread.judul} ${thread.konten}`;
+    const matches = combinedText.match(/#([a-zA-Z0-9_-]+)/g) ?? [];
+    const uniqueTags = new Set(matches.map((m) => m.slice(1).toLowerCase()));
+
+    for (const slug of uniqueTags) {
+      const existing = hashtagStats.get(slug);
+      if (existing) {
+        existing.count += 1;
+        existing.totalViews += thread.views;
+      } else {
+        hashtagStats.set(slug, {
+          label: `#${slug}`,
+          count: 1,
+          totalViews: thread.views,
+        });
+      }
+    }
+  }
+
+  const topicMap = new Map<string, TrendingItem>();
+
+  for (const cat of categories) {
+    const stats = catStats.get(cat.id) ?? { count: 0, totalViews: 0 };
+    topicMap.set(cat.slug, {
+      slug: cat.slug,
+      label: `#${cat.nama}`,
+      count: stats.count,
+      totalViews: stats.totalViews,
+    });
+  }
+
+  for (const [slug, info] of hashtagStats.entries()) {
+    if (!topicMap.has(slug)) {
+      topicMap.set(slug, {
+        slug,
+        label: info.label,
+        count: info.count,
+        totalViews: info.totalViews,
+      });
+    }
+  }
+
+  const trendingTopics = Array.from(topicMap.values()).sort(
+    (a, b) => b.count - a.count || b.totalViews - a.totalViews
+  );
+
+  const maxCount = Math.max(...trendingTopics.map((t) => t.count), 1);
 
   return (
     <div className="min-h-screen bg-[#09060e] text-slate-100 flex flex-col">
@@ -37,11 +92,17 @@ export default function TrendingTopicPage() {
           <Link href="/" className="px-4 py-2 rounded-full text-slate-400 hover:text-white hover:bg-purple-500/15 transition">
             Beranda
           </Link>
+          <Link href="/kategori" className="px-4 py-2 rounded-full text-slate-400 hover:text-white hover:bg-purple-500/15 transition">
+            Kategori
+          </Link>
           <Link href="/tag-popular" className="px-4 py-2 rounded-full text-slate-400 hover:text-white hover:bg-purple-500/15 transition">
             Tag Populer
           </Link>
           <Link href="/trending-topic" className="px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/40 text-white font-medium">
             Trending
+          </Link>
+          <Link href="/search" className="px-4 py-2 rounded-full text-slate-400 hover:text-white hover:bg-purple-500/15 transition">
+            Cari
           </Link>
         </div>
       </nav>
@@ -55,13 +116,13 @@ export default function TrendingTopicPage() {
             <span>🔥</span>
             <span>Trending Topics</span>
           </h1>
-          <p className="text-sm text-slate-400">Ranking topik paling rame minggu ini, berdasarkan jumlah thread.</p>
+          <p className="text-sm text-slate-400">Ranking topik paling rame minggu ini, berdasarkan jumlah thread dan pembaca.</p>
         </section>
 
         <section className="flex flex-col gap-3.5">
-          {TRENDING_TOPICS.map((topic, index) => {
+          {trendingTopics.map((topic, index) => {
             const rank = index + 1;
-            const percentage = Math.round((topic.count / maxCount) * 100);
+            const percentage = topic.count > 0 ? Math.max(Math.round((topic.count / maxCount) * 100), 10) : 4;
             const rankColor =
               rank === 1
                 ? 'text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.45)]'
@@ -77,14 +138,23 @@ export default function TrendingTopicPage() {
                 href={`/thread-tag?tag=${encodeURIComponent(topic.slug)}`}
                 className="rounded-2xl bg-[#181226] hover:bg-[#211934] border border-purple-500/20 hover:border-fuchsia-500/50 px-6 py-5 flex items-center gap-5 transition transform hover:-translate-y-0.5 hover:shadow-lg hover:shadow-purple-500/15"
               >
-                <div className={`w-8 text-center text-xl font-extrabold shrink-0 ${rankColor}`}> {rank} </div>  <div className="flex-1 min-w-0"> <div className="text-base font-bold text-white mb-2.5">{topic.label}</div> <div className="w-full h-2 rounded-full bg-white/5 overflow-hidden"> <div className="h-full rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-rose-500 shadow-[0_0_10px_rgba(236,72,153,0.45)]" style={{ width: `${percentage}%` }}
+                <div className={`w-8 text-center text-xl font-extrabold shrink-0 ${rankColor}`}>
+                  {rank}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="text-base font-bold text-white mb-2.5">{topic.label}</div>
+                  <div className="w-full h-2 rounded-full bg-white/5 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-rose-500 shadow-[0_0_10px_rgba(236,72,153,0.45)]"
+                      style={{ width: `${percentage}%` }}
                     />
                   </div>
                 </div>
 
-                <div className="text-right shrink-0 min-w-16">
+                <div className="text-right shrink-0 min-w-20">
                   <span className="block text-base font-extrabold text-fuchsia-300">{topic.count}</span>
-                  <span className="text-xs text-slate-500">thread</span>
+                  <span className="text-xs text-slate-500">thread • {topic.totalViews} views</span>
                 </div>
               </Link>
             );
@@ -96,5 +166,19 @@ export default function TrendingTopicPage() {
         © 2026 RuangRame — Project Forum Diskusi Kampus.
       </footer>
     </div>
+  );
+}
+
+export default function TrendingTopicPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#09060e] text-slate-300 flex items-center justify-center">
+          Memuat trending topics...
+        </div>
+      }
+    >
+      <TrendingTopicContent />
+    </Suspense>
   );
 }

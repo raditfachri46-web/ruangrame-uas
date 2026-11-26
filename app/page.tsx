@@ -34,7 +34,7 @@ async function ForumContent() {
     <>
       {/* Glass Navbar */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#09080f]/75 border-b border-white/[0.09] shadow-2xl">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 min-h-20 py-3 flex flex-wrap items-center justify-between gap-3">
           <Link href="/" className="flex items-center space-x-3.5 group">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-amber-400 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-violet-500/25 border border-white/25 group-hover:scale-105 transition-transform">
               R
@@ -44,8 +44,8 @@ async function ForumContent() {
             </span>
           </Link>
 
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <nav className="hidden md:flex items-center gap-2 text-xs font-semibold">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <nav className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-semibold">
               <Link
                 href="/"
                 className="px-3.5 py-2 rounded-full bg-violet-500/20 text-violet-200 border border-violet-400/30"
@@ -57,6 +57,18 @@ async function ForumContent() {
                 className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all"
               >
                 Kategori
+              </Link>
+              <Link
+                href="/tag-popular"
+                className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all"
+              >
+                Tag Populer
+              </Link>
+              <Link
+                href="/trending-topic"
+                className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all"
+              >
+                Trending
               </Link>
               <Link
                 href="/search"

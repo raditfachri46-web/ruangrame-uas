@@ -1,103 +1,42 @@
-'use client';
-
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { connection } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
-interface ThreadItem {
-  id: string;
-  pinned: boolean;
-  author: string;
-  time: string;
-  title: string;
-  excerpt: string;
-  replies: number;
-  views: number;
-  votes: number;
+interface ThreadTagPageProps {
+  searchParams: Promise<{ tag?: string }>;
 }
 
-const THREADS_BY_TAG: Record<string, ThreadItem[]> = {
-  coding: [
-    {
-      id: '1',
-      pinned: true,
-      author: 'rafif_dev',
-      time: '12 menit lalu',
-      title: 'Laptop 8 jutaan yang worth it buat kuliah SI, ada rekomendasi?',
-      excerpt: 'Butuh laptop buat coding sama desain ringan, budget mepet nih gaes...',
-      replies: 34,
-      views: 891,
-      votes: 128,
-    },
-    {
-      id: '2',
-      pinned: false,
-      author: 'chris.reinner',
-      time: '1 jam lalu',
-      title: '[WTS] Keyboard mechanical 2nd, kondisi 95%, harga nego',
-      excerpt: 'Jual karena ganti unit baru, komplit box dan kabel braided original...',
-      replies: 8,
-      views: 220,
-      votes: 22,
-    },
-    {
-      id: '3',
-      pinned: false,
-      author: 'chris.reinner',
-      time: '4 jam lalu',
-      title: 'Mr. Robot cocok banget buat anak SI, tapi jangan nonton sambil main HP',
-      excerpt: 'Adegan keamanan sibernya terasa realistis, alurnya bikin mikir keras...',
-      replies: 37,
-      views: 920,
-      votes: 138,
-    },
-    {
-      id: '4',
-      pinned: false,
-      author: 'tristan.a',
-      time: '6 jam lalu',
-      title: 'Framework CSS vs vanilla CSS, kalian tim mana?',
-      excerpt: 'Lagi kerjain tugas UTS pakai vanilla doang, capek tapi puas banget hasilnya...',
-      replies: 45,
-      views: 980,
-      votes: 150,
-    },
-  ],
-  default: [
-    {
-      id: '101',
-      pinned: true,
-      author: 'admin_kampus',
-      time: '30 menit lalu',
-      title: 'Diskusi Utama & Sharing Seputar Topik Ini',
-      excerpt: 'Silakan bagikan pengalaman, pertanyaan, atau referensi menarik kamu di sini!',
-      replies: 19,
-      views: 412,
-      votes: 64,
-    },
-    {
-      id: '102',
-      pinned: false,
-      author: 'mahasiswa_untar',
-      time: '2 jam lalu',
-      title: 'Ada yang mau mabar atau diskusi bareng weekend ini?',
-      excerpt: 'Cari temen satu frekuensi buat ngobrol santai selepas kelas...',
-      replies: 11,
-      views: 185,
-      votes: 29,
-    },
-  ],
-};
+async function ThreadTagContent({ searchParams }: ThreadTagPageProps) {
+  await connection();
+  const resolvedParams = await searchParams;
 
-function ThreadTagContent() {
-  const searchParams = useSearchParams();
-  const rawTag = (searchParams.get('tag') || 'coding').toLowerCase();
-  const formattedTag = rawTag
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  const [categories, allThreads] = await Promise.all([
+    prisma.kategori.findMany({ orderBy: { id: 'asc' } }),
+    prisma.thread.findMany({ orderBy: { createdAt: 'desc' } }),
+  ]);
 
-  const threads = THREADS_BY_TAG[rawTag] || THREADS_BY_TAG.default;
+  const categoryById = new Map(categories.map((c) => [c.id, c]));
+  const defaultSlug = categories[0]?.slug ?? 'teknologi-coding';
+  const rawTag = (resolvedParams.tag || defaultSlug).toLowerCase().trim();
+
+  const matchedCategory = categories.find((c) => c.slug.toLowerCase() === rawTag);
+  const keyword = rawTag.replace(/-/g, ' ');
+
+  const filteredThreads = allThreads.filter((thread) => {
+    if (matchedCategory && thread.kategoriId === matchedCategory.id) {
+      return true;
+    }
+    const text = `${thread.judul} ${thread.konten}`.toLowerCase();
+    return text.includes(`#${rawTag}`) || text.includes(keyword);
+  });
+
+  const displayTitle = matchedCategory
+    ? matchedCategory.nama
+    : rawTag
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
 
   return (
     <div className="min-h-screen bg-[#09060e] text-slate-100 flex flex-col">
@@ -113,69 +52,115 @@ function ThreadTagContent() {
           <Link href="/" className="px-4 py-2 rounded-full text-slate-400 hover:text-white hover:bg-purple-500/15 transition">
             Beranda
           </Link>
+          <Link href="/kategori" className="px-4 py-2 rounded-full text-slate-400 hover:text-white hover:bg-purple-500/15 transition">
+            Kategori
+          </Link>
           <Link href="/tag-popular" className="px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/40 text-white font-medium">
             Tag Populer
           </Link>
           <Link href="/trending-topic" className="px-4 py-2 rounded-full text-slate-400 hover:text-white hover:bg-purple-500/15 transition">
             Trending
           </Link>
+          <Link href="/search" className="px-4 py-2 rounded-full text-slate-400 hover:text-white hover:bg-purple-500/15 transition">
+            Cari
+          </Link>
         </div>
       </nav>
 
       <main className="w-full max-w-5xl mx-auto px-5 py-8 flex-1">
-        <section className="rounded-2xl border border-purple-500/20 bg-gradient-to-tr from-[#130e1d] via-[#130e1d] to-purple-950/40 p-8 mb-7 flex flex-wrap items-center justify-between gap-4">
+        <section className="rounded-2xl border border-purple-500/20 bg-gradient-to-tr from-[#130e1d] via-[#130e1d] to-purple-950/40 p-8 mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="text-xs text-slate-400 mb-2">
               <Link href="/" className="text-purple-400 hover:underline">Beranda</Link> /{' '}
-              <Link href="/tag-popular" className="text-purple-400 hover:underline">Tag</Link> /{' '}
-              <span>{formattedTag}</span>
+              <Link href="/tag-popular" className="text-purple-400 hover:underline">Tag Populer</Link> /{' '}
+              <span>{displayTitle}</span>
             </div>
             <h1 className="text-3xl font-extrabold bg-gradient-to-r from-white to-fuchsia-400 bg-clip-text text-transparent">
-              #{formattedTag}
+              #{displayTitle}
             </h1>
+            <p className="text-xs text-slate-400 mt-1">
+              Menampilkan {filteredThreads.length} diskusi terkait topik ini
+            </p>
           </div>
 
           <Link
-            href="/"
+            href="/buat-thread"
             className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-pink-600/30 hover:opacity-95 transition"
           >
             + Buat Diskusi Baru
           </Link>
         </section>
 
-        <section className="flex flex-col gap-4">
-          {threads.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-2xl bg-[#181226] hover:bg-[#211934] border border-purple-500/20 hover:border-fuchsia-500/45 p-5 flex items-start gap-4 transition"
-            >
-              <div className="w-11 h-11 rounded-xl shrink-0 bg-gradient-to-br from-purple-700 to-pink-600 flex items-center justify-center font-extrabold text-sm text-white">
-                {item.author.slice(0, 2).toUpperCase()}
-              </div>
+        <div className="flex flex-wrap gap-2 mb-6">
+          {categories.map((cat) => {
+            const active = cat.slug.toLowerCase() === rawTag;
+            return (
+              <Link
+                key={cat.id}
+                href={`/thread-tag?tag=${encodeURIComponent(cat.slug)}`}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+                  active
+                    ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
+                    : 'bg-[#181226] text-slate-400 border border-purple-500/20 hover:text-white'
+                }`}
+              >
+                #{cat.nama}
+              </Link>
+            );
+          })}
+        </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                  {item.pinned && (
-                    <span className="rounded-md bg-gradient-to-r from-orange-500 to-pink-500 px-2 py-0.5 text-[10px] font-extrabold tracking-wider text-white">
-                      PINNED
-                    </span>
-                  )}
-                  <h2 className="text-base font-bold text-white">{item.title}</h2>
-                </div>
+        {filteredThreads.length === 0 ? (
+          <div className="rounded-2xl border border-purple-500/20 bg-[#130e1d] p-12 text-center text-slate-400 text-sm">
+            Belum ada diskusi untuk tag <strong className="text-white">#{displayTitle}</strong>. Jadilah yang pertama membuat diskusi!
+          </div>
+        ) : (
+          <section className="flex flex-col gap-4">
+            {filteredThreads.map((item) => {
+              const kategori = categoryById.get(item.kategoriId);
+              const formattedDate = new Date(item.createdAt).toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              });
 
-                <p className="text-sm text-slate-400 mb-3 leading-relaxed">{item.excerpt}</p>
+              return (
+                <Link
+                  key={item.id}
+                  href={`/thread/${item.id}`}
+                  className="rounded-2xl bg-[#181226] hover:bg-[#211934] border border-purple-500/20 hover:border-fuchsia-500/45 p-5 flex items-start gap-4 transition"
+                >
+                  <div className="w-11 h-11 rounded-xl shrink-0 bg-gradient-to-br from-purple-700 to-pink-600 flex items-center justify-center font-extrabold text-sm text-white">
+                    {item.penulis.slice(0, 2).toUpperCase()}
+                  </div>
 
-                <div className="flex flex-wrap items-center gap-3.5 text-xs text-slate-500">
-                  <span className="font-bold text-fuchsia-300">{item.author}</span>
-                  <span>{item.time}</span>
-                  <span><strong className="text-purple-300">{item.replies}</strong> balasan</span>
-                  <span><strong className="text-purple-300">{item.views}</strong> dilihat</span>
-                  <span><strong className="text-purple-300">{item.votes}</strong> vote</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </section>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                      {kategori && (
+                        <span className="rounded-full bg-purple-500/20 border border-purple-500/35 px-2.5 py-0.5 text-[11px] font-semibold text-purple-200">
+                          {kategori.nama}
+                        </span>
+                      )}
+                      <h2 className="text-base font-bold text-white">{item.judul}</h2>
+                    </div>
+
+                    <p className="text-sm text-slate-400 mb-3 leading-relaxed line-clamp-2">
+                      {item.konten}
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-3.5 text-xs text-slate-500">
+                      <span className="font-bold text-fuchsia-300">{item.penulis}</span>
+                      <span>{formattedDate}</span>
+                      <span>
+                        <strong className="text-purple-300">{item.views}</strong> dilihat
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </section>
+        )}
       </main>
 
       <footer className="border-t border-purple-500/20 py-6 px-5 text-center text-xs text-slate-500">
@@ -185,10 +170,16 @@ function ThreadTagContent() {
   );
 }
 
-export default function ThreadTagPage() {
+export default function ThreadTagPage({ searchParams }: ThreadTagPageProps) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#09060e] text-slate-300 p-8">Memuat thread...</div>}>
-      <ThreadTagContent />
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#09060e] text-slate-300 flex items-center justify-center">
+          Memuat daftar diskusi...
+        </div>
+      }
+    >
+      <ThreadTagContent searchParams={searchParams} />
     </Suspense>
   );
 }
