@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
+import { Navbar } from '@/components/Navbar';
 
 async function KategoriDirectoryContent() {
   let categories: { id: number; nama: string; slug: string }[] = [];
@@ -17,6 +18,7 @@ async function KategoriDirectoryContent() {
       orderBy: { id: 'asc' },
     });
     threads = await prisma.thread.findMany({
+      where: { deletedAt: null },
       select: {
         id: true,
         judul: true,
@@ -43,53 +45,7 @@ async function KategoriDirectoryContent() {
 
   return (
     <>
-      {/* Glass Navbar */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#09080f]/75 border-b border-white/[0.09] shadow-2xl">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-3.5 group">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-amber-400 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-violet-500/25 border border-white/25 group-hover:scale-105 transition-transform">
-              R
-            </div>
-            <span className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-white via-violet-100 to-fuchsia-300 bg-clip-text text-transparent">
-              RuangRame
-            </span>
-          </Link>
-
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <nav className="hidden md:flex items-center gap-2 text-xs font-semibold">
-              <Link
-                href="/"
-                className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all"
-              >
-                Beranda
-              </Link>
-              <Link
-                href="/kategori"
-                className="px-3.5 py-2 rounded-full bg-violet-500/20 text-violet-200 border border-violet-400/30"
-              >
-                Kategori
-              </Link>
-            </nav>
-
-            <div
-              className={`flex items-center space-x-2.5 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border shadow-inner ${
-                isConnected
-                  ? 'bg-emerald-500/10 border-emerald-400/30 text-emerald-300'
-                  : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
-              }`}
-            >
-              <span
-                className={`w-2.5 h-2.5 rounded-full ${
-                  isConnected
-                    ? 'bg-emerald-400 animate-pulse shadow-[0_0_12px_#34d399]'
-                    : 'bg-rose-400'
-                }`}
-              ></span>
-              <span>{isConnected ? 'Database Connected' : 'Connection Error'}</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar isConnected={isConnected} />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8 relative z-10">

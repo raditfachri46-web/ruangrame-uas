@@ -51,7 +51,7 @@ async function HasilPencarian({ searchParams }: Pick<PageProps<'/search'>, 'sear
       ])
     } else {
       // Belum mencari apa-apa: tampilkan thread terpopuler sebagai saran
-      threads = await ambilThread({}, 'populer', 0, 5)
+      threads = await ambilThread({ deletedAt: null }, 'populer', 0, 5)
     }
   } catch {
     gagal = true
