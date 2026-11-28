@@ -2,6 +2,10 @@ import { Suspense } from 'react';
 import { connection } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import TagPopularClient, { TagItem } from './TagPopularClient';
+import { PageShell } from '@/components/PageShell';
+import { PageHeading } from '@/components/ui';
+
+export const metadata = { title: 'Tag populer' };
 
 async function TagPopularContent() {
   await connection();
@@ -59,14 +63,14 @@ async function TagPopularContent() {
 
 export default function TagPopularPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-[#09060e] text-slate-300 flex items-center justify-center">
-          Memuat tag populer...
-        </div>
-      }
-    >
-      <TagPopularContent />
-    </Suspense>
-  );
+    <PageShell aktif="tag">
+      <PageHeading
+        judul="Tag populer"
+        deskripsi="Dihitung dari kategori dan hashtag (#) di judul atau isi thread."
+      />
+      <Suspense fallback={<p className="text-pudar">Memuat tag</p>}>
+        <TagPopularContent />
+      </Suspense>
+    </PageShell>
+  )
 }
