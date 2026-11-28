@@ -91,7 +91,7 @@ async function HasilPencarian({ searchParams }: Pick<PageProps<'/search'>, 'sear
           defaultValue={q}
           maxLength={100}
           placeholder="Ketik kata kunci..."
-          className="rounded-2xl bg-white/[0.05] border border-white/[0.1] px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-fuchsia-400/60"
+          className="rounded-2xl bg-white/[0.05] border border-white/[0.1] px-4 py-3 text-sm text-white placeholder:text-slate-400 outline-none focus:border-fuchsia-400/60"
         />
         <label htmlFor="search-kategori" className="sr-only">
           Kategori
@@ -135,10 +135,7 @@ async function HasilPencarian({ searchParams }: Pick<PageProps<'/search'>, 'sear
       {/* Filter cepat kategori */}
       {daftarKategori.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={buatUrlSearch({ q, urut })}
-            className={chip(kategori === '')}
-          >
+          <Link href={buatUrlSearch({ q, urut })} className={chip(kategori === '')}>
             Semua
           </Link>
           {daftarKategori.map((k) => (
@@ -154,7 +151,10 @@ async function HasilPencarian({ searchParams }: Pick<PageProps<'/search'>, 'sear
       )}
 
       {gagal && (
-        <div className="rounded-3xl bg-white/[0.03] border border-rose-500/30 p-8 text-center text-sm text-slate-300">
+        <div
+          role="alert"
+          className="rounded-3xl bg-white/[0.03] border border-rose-500/30 p-8 text-center text-sm text-slate-300"
+        >
           Gagal memuat hasil pencarian. Periksa koneksi database lalu coba lagi.
         </div>
       )}
@@ -162,11 +162,13 @@ async function HasilPencarian({ searchParams }: Pick<PageProps<'/search'>, 'sear
       {/* Belum mencari */}
       {!gagal && !adaFilter && (
         <section className="space-y-4">
-          <h2 className="text-lg font-bold text-white">🔥 Diskusi terpopuler</h2>
+          <h2 className="text-lg font-bold text-white">Diskusi terpopuler</h2>
           {threads.length > 0 ? (
             threads.map((t) => <ThreadCard key={t.id} thread={t} />)
           ) : (
-            <p className="text-sm text-slate-400">Belum ada diskusi.</p>
+            <div className="rounded-3xl bg-white/[0.03] border border-dashed border-white/[0.15] p-6 text-sm text-slate-400">
+              Belum ada diskusi.
+            </div>
           )}
         </section>
       )}
@@ -183,12 +185,21 @@ async function HasilPencarian({ searchParams }: Pick<PageProps<'/search'>, 'sear
                   untuk <strong className="text-amber-200">&ldquo;{q}&rdquo;</strong>
                 </>
               )}
-              {namaKategori && <> di kategori <strong className="text-white">{namaKategori}</strong></>}
+              {namaKategori && (
+                <>
+                  {' '}
+                  di kategori <strong className="text-white">{namaKategori}</strong>
+                </>
+              )}
             </p>
-            <div className="flex items-center gap-1.5 text-xs">
-              <span className="text-slate-500">Urutkan:</span>
+            <div className="flex flex-wrap items-center gap-1.5 text-xs">
+              <span className="text-slate-400">Urutkan:</span>
               {(Object.keys(URUTAN) as Urutan[]).map((u) => (
-                <Link key={u} href={buatUrlSearch({ q, kategori, urut: u })} className={chip(urut === u)}>
+                <Link
+                  key={u}
+                  href={buatUrlSearch({ q, kategori, urut: u })}
+                  className={chip(urut === u)}
+                >
                   {URUTAN[u]}
                 </Link>
               ))}
@@ -210,8 +221,11 @@ async function HasilPencarian({ searchParams }: Pick<PageProps<'/search'>, 'sear
             </>
           ) : (
             <div className="text-center py-14 rounded-3xl bg-white/[0.03] border border-white/[0.09] p-8 shadow-2xl">
-              <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-400/20 flex items-center justify-center mx-auto mb-4 text-2xl">
-                🔍
+              <div
+                aria-hidden="true"
+                className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-400/20 flex items-center justify-center mx-auto mb-4 text-2xl font-black text-violet-300"
+              >
+                ?
               </div>
               <h2 className="font-semibold text-white mb-1">Tidak ada hasil</h2>
               <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed mb-5">
@@ -228,7 +242,7 @@ async function HasilPencarian({ searchParams }: Pick<PageProps<'/search'>, 'sear
                     href={`/buat-thread?judul=${encodeURIComponent(q)}`}
                     className="px-4 py-2 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-xs font-semibold text-white"
                   >
-                    + Buat diskusi &ldquo;{q.length > 30 ? q.slice(0, 30) + '…' : q}&rdquo;
+                    + Buat diskusi &ldquo;{q.length > 30 ? q.slice(0, 30) + '...' : q}&rdquo;
                   </Link>
                 )}
               </div>
@@ -266,10 +280,10 @@ function chip(aktif: boolean): string {
 function SearchSkeleton() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-pulse" aria-busy="true">
-      <div className="h-10 w-56 rounded bg-white/10"></div>
-      <div className="h-20 rounded-3xl bg-white/[0.04] border border-white/[0.09]"></div>
+      <div className="h-10 w-56 rounded bg-white/20"></div>
+      <div className="h-20 rounded-3xl bg-white/[0.06] border border-white/[0.15]"></div>
       {[0, 1, 2].map((i) => (
-        <div key={i} className="h-36 rounded-3xl bg-white/[0.04] border border-white/[0.09]"></div>
+        <div key={i} className="h-36 rounded-3xl bg-white/[0.06] border border-white/[0.15]"></div>
       ))}
     </div>
   )
