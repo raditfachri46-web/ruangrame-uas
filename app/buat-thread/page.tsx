@@ -43,7 +43,10 @@ async function FormLoader({ searchParams }: Pick<PageProps<'/buat-thread'>, 'sea
     kategori = await prisma.kategori.findMany({ orderBy: { nama: 'asc' } })
   } catch {
     return (
-      <div className="rounded-3xl bg-white/[0.03] border border-rose-500/30 p-8 text-center text-sm text-slate-300">
+      <div
+        role="alert"
+        className="rounded-3xl bg-white/[0.03] border border-rose-500/30 p-8 text-center text-sm text-slate-300"
+      >
         Gagal memuat kategori. Periksa koneksi database lalu muat ulang halaman.
       </div>
     )
@@ -51,7 +54,7 @@ async function FormLoader({ searchParams }: Pick<PageProps<'/buat-thread'>, 'sea
 
   if (kategori.length === 0) {
     return (
-      <div className="rounded-3xl bg-white/[0.03] border border-white/[0.09] p-8 text-center text-sm text-slate-300">
+      <div className="rounded-3xl bg-white/[0.03] border border-dashed border-white/[0.15] p-8 text-center text-sm text-slate-300">
         Belum ada kategori di database, jadi thread belum bisa dibuat. Tambahkan minimal satu
         kategori dulu.
       </div>
@@ -64,13 +67,13 @@ async function FormLoader({ searchParams }: Pick<PageProps<'/buat-thread'>, 'sea
 function FormSkeleton() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-pulse" aria-busy="true">
-      <div className="lg:col-span-2 rounded-3xl bg-white/[0.04] border border-white/[0.09] p-8 space-y-6">
-        <div className="h-10 w-2/3 rounded-xl bg-white/10"></div>
-        <div className="h-12 rounded-2xl bg-white/10"></div>
-        <div className="h-48 rounded-2xl bg-white/10"></div>
-        <div className="h-12 rounded-2xl bg-white/10"></div>
+      <div className="lg:col-span-2 rounded-3xl bg-white/[0.06] border border-white/[0.15] p-8 space-y-6">
+        <div className="h-10 w-2/3 rounded-xl bg-white/20"></div>
+        <div className="h-12 rounded-2xl bg-white/20"></div>
+        <div className="h-48 rounded-2xl bg-white/20"></div>
+        <div className="h-12 rounded-2xl bg-white/20"></div>
       </div>
-      <div className="h-48 rounded-3xl bg-white/[0.04] border border-white/[0.09]"></div>
+      <div className="h-48 rounded-3xl bg-white/[0.06] border border-white/[0.15]"></div>
     </div>
   )
 }
