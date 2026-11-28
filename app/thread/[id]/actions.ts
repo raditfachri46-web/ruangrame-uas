@@ -89,3 +89,23 @@ export async function toggleVote(threadId: number) {
 
   revalidatePath(`/thread/${threadId}`)
 }
+
+export async function hapusKomentar(commentId: number) {
+  const user = await getCurrentUser()
+  if (!user) redirect('/login')
+
+  const komentar = await prisma.comment.findUnique({
+    where: { id: commentId },
+    select: { id: true, userId: true, threadId: true, deletedAt: true },
+  })
+
+  // Cek di server: komentar harus ada, belum dihapus, dan milik user yang login
+  if (!komentar || komentar.deletedAt || komentar.userId !== user.id) return
+
+  await prisma.comment.update({
+    where: { id: commentId },
+    data: { deletedAt: new Date() },
+  })
+
+  revalidatePath(`/thread/${komentar.threadId}`)
+}

@@ -172,7 +172,12 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
         </div>
       </article>
 
-      <CommentSection threadId={thread.id} komentar={thread.comments} sudahLogin={!!user} />
+      <CommentSection
+        threadId={thread.id}
+        komentar={thread.comments}
+        sudahLogin={!!user}
+        userIdSaatIni={user?.id ?? null}
+      />
 
       {/* Thread terkait */}
       <section aria-labelledby="judul-terkait" className="space-y-4">
