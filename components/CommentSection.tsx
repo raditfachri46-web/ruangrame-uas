@@ -1,11 +1,13 @@
 import { inisial, warnaAvatar, waktuRelatif } from '@/lib/format'
 import { CommentForm } from '@/components/CommentForm'
 import { ReportButton } from '@/components/ReportButton'
+import { HapusKomentarTombol } from '@/components/HapusKomentarTombol'
 
 export type KomentarData = {
   id: number
   content: string
   createdAt: Date
+  userId: number
   user: { username: string }
 }
 
@@ -13,14 +15,16 @@ export function CommentSection({
   threadId,
   komentar,
   sudahLogin,
+  userIdSaatIni = null,
 }: {
   threadId: number
   komentar: KomentarData[]
   sudahLogin: boolean
+  userIdSaatIni?: number | null
 }) {
   return (
     <section className="space-y-5">
-      <h2 className="text-lg font-bold text-white">💬 Komentar ({komentar.length})</h2>
+      <h2 className="text-lg font-bold text-white">Komentar ({komentar.length})</h2>
 
       {sudahLogin ? (
         <CommentForm threadId={threadId} />
@@ -57,8 +61,11 @@ export function CommentSection({
                 <p className="text-sm text-slate-300 mt-1 break-words whitespace-pre-wrap">
                   {k.content}
                 </p>
-                <div className="mt-2">
+                <div className="mt-2 flex items-center gap-4">
                   <ReportButton targetType="COMMENT" commentId={k.id} />
+                  {userIdSaatIni !== null && k.userId === userIdSaatIni && (
+                    <HapusKomentarTombol commentId={k.id} />
+                  )}
                 </div>
               </div>
             </div>
