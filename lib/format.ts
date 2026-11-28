@@ -49,19 +49,34 @@ export function inisial(nama: string): string {
 }
 
 const WARNA_AVATAR = [
-  'from-violet-600 to-fuchsia-500',
-  'from-fuchsia-600 to-rose-500',
-  'from-amber-500 to-rose-500',
-  'from-emerald-500 to-teal-500',
-  'from-sky-500 to-violet-500',
-  'from-rose-500 to-amber-400',
+  'bg-cobalt text-white',
+  'bg-coral text-white',
+  'bg-sun text-ink',
+  'bg-mint text-ink',
+  'bg-ink text-white',
 ]
+
+function hash(teks: string): number {
+  let h = 0
+  for (const huruf of teks) h = (h * 31 + huruf.charCodeAt(0)) >>> 0
+  return h
+}
 
 // Warna avatar konsisten untuk nama yang sama
 export function warnaAvatar(nama: string): string {
-  let hash = 0
-  for (const huruf of nama) hash = (hash * 31 + huruf.charCodeAt(0)) >>> 0
-  return WARNA_AVATAR[hash % WARNA_AVATAR.length]
+  return WARNA_AVATAR[hash(nama) % WARNA_AVATAR.length]
+}
+
+const WARNA_KATEGORI = [
+  { blok: 'bg-cobalt text-white', sub: 'text-white/75', bar: 'bg-cobalt', chip: 'bg-cobalt/10 text-cobalt border-cobalt/40', titik: 'bg-cobalt' },
+  { blok: 'bg-coral text-ink', sub: 'text-ink/70', bar: 'bg-coral', chip: 'bg-coral/15 text-[#b8321f] border-coral/50', titik: 'bg-coral' },
+  { blok: 'bg-sun text-ink', sub: 'text-ink/70', bar: 'bg-sun', chip: 'bg-sun/40 text-ink border-sun', titik: 'bg-sun' },
+  { blok: 'bg-mint text-ink', sub: 'text-ink/70', bar: 'bg-mint', chip: 'bg-mint/20 text-[#0b6b4f] border-mint/60', titik: 'bg-mint' },
+]
+
+// Warna kategori konsisten berdasarkan nama, dipakai di bar, chip, dan titik
+export function warnaKategori(nama: string | null | undefined) {
+  return WARNA_KATEGORI[hash(nama ?? 'Umum') % WARNA_KATEGORI.length]
 }
 
 // Ambil potongan teks di sekitar kata kunci pertama yang cocok

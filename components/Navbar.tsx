@@ -1,51 +1,54 @@
+import { Suspense, type ReactNode } from 'react'
 import Link from 'next/link'
 import { getCurrentUser } from '@/lib/session'
 import { logoutUser } from '@/app/actions/auth'
 import { NotificationBell } from '@/components/NotificationBell'
+import { NavLinks } from '@/components/NavLinks'
+import { Logo } from '@/components/Logo'
 
-export async function Navbar({ isConnected }: { isConnected?: boolean }) {
+const linkTambahan =
+  'px-3 py-1.5 rounded-lg text-sm font-semibold text-ink hover:bg-sun transition-colors whitespace-nowrap'
+
+type NavbarProps = {
+  isConnected?: boolean
+  aksi?: ReactNode
+}
+
+function KerangkaNavbar() {
+  return (
+    <header className="sticky top-0 z-50 bg-paper border-b-2 border-ink">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <Logo />
+      </div>
+    </header>
+  )
+}
+
+async function NavbarIsi({ isConnected, aksi }: NavbarProps) {
   const user = await getCurrentUser()
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#09080f]/75 border-b border-white/[0.09] shadow-2xl">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-        <Link href="/" className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-amber-400 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-violet-500/25 border border-white/25">
-            R
-          </div>
-          <span className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-white via-violet-100 to-fuchsia-300 bg-clip-text text-transparent">
-            RuangRame
-          </span>
-        </Link>
+    <header className="sticky top-0 z-50 bg-paper border-b-2 border-ink">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <Logo />
 
-        <nav className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
-          <Link href="/" className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
-            Beranda
-          </Link>
-          <Link href="/kategori" className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
-            Kategori
-          </Link>
-          <Link href="/tag-popular" className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
-            Tag Populer
-          </Link>
-          <Link href="/trending-topic" className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
-            Trending
-          </Link>
-          <Link href="/leaderboard" className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
-            🏆 Leaderboard
+        <div className="order-3 lg:order-none w-full lg:w-auto overflow-x-auto -mx-1 px-1 flex items-center gap-1">
+          <NavLinks />
+          <Link href="/leaderboard" className={linkTambahan}>
+            Leaderboard
           </Link>
           {(user?.role === 'MODERATOR' || user?.role === 'ADMIN') && (
-            <Link href="/moderasi" className="px-3.5 py-2 rounded-full text-amber-300 hover:text-amber-200 hover:bg-amber-500/10 transition-all">
-              🛡️ Moderasi
+            <Link href="/moderasi" className={linkTambahan}>
+              Moderasi
             </Link>
           )}
-        </nav>
+        </div>
 
         <form
           action="/search"
           method="GET"
           role="search"
-          className="order-3 sm:order-none w-full sm:w-auto sm:flex-1 sm:max-w-md relative"
+          className="order-4 lg:order-none w-full lg:w-auto lg:flex-1 lg:max-w-sm relative lg:ml-auto"
         >
           <label htmlFor="navbar-q" className="sr-only">
             Cari diskusi
@@ -55,54 +58,56 @@ export async function Navbar({ isConnected }: { isConnected?: boolean }) {
             name="q"
             type="search"
             maxLength={100}
-            placeholder="Cari diskusi..."
-            className="w-full rounded-2xl bg-white/[0.05] border border-white/[0.1] pl-4 pr-11 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:border-fuchsia-400/50 focus:bg-white/[0.08] transition-colors"
+            placeholder="Cari tugas, matkul, info..."
+            className="w-full rounded-lg bg-white border-2 border-ink pl-3.5 pr-11 py-2 text-sm text-ink placeholder:text-ink/45 outline-none focus:shadow-hard-sm transition-shadow"
           />
           <button
             type="submit"
             aria-label="Cari"
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+            className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 grid place-items-center rounded-md text-ink hover:bg-sun transition-colors"
           >
-            🔍
+            <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+              <circle cx="8.5" cy="8.5" r="5.5" />
+              <path d="m13 13 4 4" />
+            </svg>
           </button>
         </form>
 
-        <div className="flex items-center gap-3">
+        <div className="ml-auto lg:ml-0 flex items-center gap-2.5">
           {isConnected !== undefined && (
-            <div
-              className={`hidden md:flex items-center space-x-2 px-3.5 py-2 rounded-full text-xs font-semibold border ${
-                isConnected
-                  ? 'bg-emerald-500/10 border-emerald-400/30 text-emerald-300'
-                  : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+            <span
+              title={isConnected ? 'Database terhubung' : 'Koneksi database bermasalah'}
+              className={`hidden xl:inline-flex items-center gap-1.5 text-xs font-semibold ${
+                isConnected ? 'text-ink/60' : 'text-coral'
               }`}
             >
               <span
-                className={`w-2 h-2 rounded-full ${
-                  isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
-                }`}
-              ></span>
-              <span>{isConnected ? 'Database Connected' : 'Connection Error'}</span>
-            </div>
+                className={`w-2 h-2 rounded-full ${isConnected ? 'bg-mint' : 'bg-coral'}`}
+              />
+              {isConnected ? 'Terhubung' : 'Koneksi bermasalah'}
+            </span>
           )}
 
           {user && <NotificationBell userId={user.id} />}
 
+          {aksi}
+
           <Link
             href="/buat-thread"
-            className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-rose-400 text-white font-semibold text-sm shadow-lg shadow-fuchsia-600/25 transition-all active:scale-95 border border-white/25 whitespace-nowrap"
+            className="btn-hard rounded-lg bg-cobalt text-white font-bold text-sm px-4 py-2 whitespace-nowrap"
           >
             + Buat Thread
           </Link>
 
           {user ? (
             <div className="hidden sm:flex items-center gap-2">
-              <span className="px-3.5 py-2 rounded-full bg-fuchsia-500/15 border border-fuchsia-400/30 text-xs font-bold text-fuchsia-200">
+              <span className="rounded-lg bg-sun border-2 border-ink px-3 py-1.5 text-xs font-bold text-ink">
                 @{user.username}
               </span>
               <form action={logoutUser}>
                 <button
                   type="submit"
-                  className="px-3.5 py-2 rounded-full bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 text-xs font-semibold text-rose-200 transition"
+                  className="btn-hard rounded-lg bg-white text-ink font-bold text-xs px-3 py-1.5"
                 >
                   Logout
                 </button>
@@ -112,7 +117,7 @@ export async function Navbar({ isConnected }: { isConnected?: boolean }) {
             <div className="hidden sm:flex items-center gap-2">
               <Link
                 href="/login"
-                className="px-4 py-2 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-xs font-semibold text-white transition"
+                className="btn-hard rounded-lg bg-white text-ink font-bold text-xs px-3 py-1.5"
               >
                 Login
               </Link>
@@ -121,5 +126,13 @@ export async function Navbar({ isConnected }: { isConnected?: boolean }) {
         </div>
       </div>
     </header>
+  )
+}
+
+export function Navbar(props: NavbarProps) {
+  return (
+    <Suspense fallback={<KerangkaNavbar />}>
+      <NavbarIsi {...props} />
+    </Suspense>
   )
 }

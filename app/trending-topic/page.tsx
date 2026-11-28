@@ -2,6 +2,10 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/PageShell';
+
+export const metadata = { title: 'Trending' };
 
 interface TrendingItem {
   slug: string;
@@ -78,108 +82,81 @@ async function TrendingTopicContent() {
   );
 
   const maxCount = Math.max(...trendingTopics.map((t) => t.count), 1);
+  const urutanLatar = ['bg-sun', 'bg-mint', 'bg-coral'];
 
   return (
-    <div className="min-h-screen bg-[#09060e] text-slate-100 flex flex-col">
-      <nav className="sticky top-0 z-50 border-b border-purple-500/20 bg-[#0d0916]/85 backdrop-blur-md px-6 py-4 flex flex-wrap items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-3 font-extrabold text-xl text-white">
-          <span className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-sm shadow-lg shadow-purple-500/40">
-            R
-          </span>
-          <span>RuangRame</span>
-        </Link>
+    <>
+      <Navbar />
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10">
+        <h1 className="font-display font-extrabold text-4xl sm:text-5xl leading-tight tracking-tight">
+          Trending
+        </h1>
+        <p className="mt-3 mb-8 text-lg text-ink/70 max-w-xl">
+          Topik dengan thread terbanyak. Jumlah dilihat dipakai kalau jumlah thread sama.
+        </p>
 
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <Link href="/" className="px-4 py-2 rounded-full text-slate-400 hover:text-white hover:bg-purple-500/15 transition">
-            Beranda
-          </Link>
-          <Link href="/kategori" className="px-4 py-2 rounded-full text-slate-400 hover:text-white hover:bg-purple-500/15 transition">
-            Kategori
-          </Link>
-          <Link href="/tag-popular" className="px-4 py-2 rounded-full text-slate-400 hover:text-white hover:bg-purple-500/15 transition">
-            Tag Populer
-          </Link>
-          <Link href="/trending-topic" className="px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/40 text-white font-medium">
-            Trending
-          </Link>
-          <Link href="/search" className="px-4 py-2 rounded-full text-slate-400 hover:text-white hover:bg-purple-500/15 transition">
-            Cari
-          </Link>
-        </div>
-      </nav>
-
-      <main className="w-full max-w-4xl mx-auto px-5 py-8 flex-1">
-        <section className="rounded-2xl border border-purple-500/20 bg-gradient-to-tr from-[#130e1d] via-[#130e1d] to-purple-950/40 p-8 mb-8">
-          <div className="text-xs text-slate-400 mb-2">
-            <Link href="/" className="text-purple-400 hover:underline">Beranda</Link> / Trending Topics
+        {trendingTopics.length === 0 ? (
+          <div className="rounded-xl border-2 border-dashed border-ink/40 bg-white p-10 text-center">
+            <h2 className="font-display text-xl font-bold mb-1">Belum ada topik</h2>
+            <p className="text-sm text-ink/65 max-w-xs mx-auto">
+              Topik muncul setelah ada thread di salah satu kategori.
+            </p>
           </div>
-          <h1 className="text-3xl font-extrabold text-white mb-2 flex items-center gap-2.5">
-            <span>🔥</span>
-            <span>Trending Topics</span>
-          </h1>
-          <p className="text-sm text-slate-400">Ranking topik paling rame minggu ini, berdasarkan jumlah thread dan pembaca.</p>
-        </section>
-
-        <section className="flex flex-col gap-3.5">
-          {trendingTopics.map((topic, index) => {
-            const rank = index + 1;
-            const percentage = topic.count > 0 ? Math.max(Math.round((topic.count / maxCount) * 100), 10) : 4;
-            const rankColor =
-              rank === 1
-                ? 'text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.45)]'
-                : rank === 2
-                ? 'text-slate-200'
-                : rank === 3
-                ? 'text-orange-400'
-                : 'text-slate-400';
-
-            return (
-              <Link
-                key={topic.slug}
-                href={`/thread-tag?tag=${encodeURIComponent(topic.slug)}`}
-                className="rounded-2xl bg-[#181226] hover:bg-[#211934] border border-purple-500/20 hover:border-fuchsia-500/50 px-6 py-5 flex items-center gap-5 transition transform hover:-translate-y-0.5 hover:shadow-lg hover:shadow-purple-500/15"
-              >
-                <div className={`w-8 text-center text-xl font-extrabold shrink-0 ${rankColor}`}>
-                  {rank}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="text-base font-bold text-white mb-2.5">{topic.label}</div>
-                  <div className="w-full h-2 rounded-full bg-white/5 overflow-hidden">
+        ) : (
+          <ol className="grid gap-3">
+            {trendingTopics.map((topic, index) => {
+              const percentage =
+                topic.count > 0 ? Math.max(Math.round((topic.count / maxCount) * 100), 6) : 0;
+              const latarNomor = index < 3 ? urutanLatar[index] : 'bg-paper';
+              return (
+                <li key={topic.slug}>
+                  <Link
+                    href={`/thread-tag?tag=${encodeURIComponent(topic.slug)}`}
+                    className="group flex items-stretch rounded-xl border-2 border-ink bg-white shadow-hard-sm overflow-hidden transition-all hover:-translate-y-0.5"
+                  >
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-rose-500 shadow-[0_0_10px_rgba(236,72,153,0.45)]"
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="text-right shrink-0 min-w-20">
-                  <span className="block text-base font-extrabold text-fuchsia-300">{topic.count}</span>
-                  <span className="text-xs text-slate-500">thread • {topic.totalViews} views</span>
-                </div>
-              </Link>
-            );
-          })}
-        </section>
+                      className={`w-14 sm:w-16 shrink-0 grid place-items-center border-r-2 border-ink font-display text-2xl font-extrabold tabular-nums ${latarNomor}`}
+                    >
+                      {index + 1}
+                    </div>
+                    <div className="min-w-0 flex-1 px-4 py-4">
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                        <span className="min-w-0 text-lg font-display font-bold break-words group-hover:underline underline-offset-4">
+                          {topic.label}
+                        </span>
+                        <span className="shrink-0 text-sm tabular-nums text-ink/65">
+                          {topic.count} thread, {topic.totalViews} dilihat
+                        </span>
+                      </div>
+                      <div className="mt-3 h-2.5 rounded-full border-2 border-ink bg-paper overflow-hidden" aria-hidden="true">
+                        <div className="h-full bg-cobalt" style={{ width: `${percentage}%` }} />
+                      </div>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+        )}
       </main>
-
-      <footer className="border-t border-purple-500/20 py-6 px-5 text-center text-xs text-slate-500">
-        © 2026 RuangRame — Project Forum Diskusi Kampus.
-      </footer>
-    </div>
+      <Footer />
+    </>
   );
 }
 
 export default function TrendingTopicPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-[#09060e] text-slate-300 flex items-center justify-center">
-          Memuat trending topics...
-        </div>
-      }
-    >
-      <TrendingTopicContent />
-    </Suspense>
+    <div className="min-h-screen flex flex-col text-ink">
+      <Suspense
+        fallback={
+          <div className="flex-1 min-h-screen flex flex-col items-center justify-center gap-4 text-ink/65">
+            <div className="w-10 h-10 rounded-lg border-4 border-ink/15 border-t-cobalt animate-spin" />
+            <p className="text-sm font-semibold">Memuat topik...</p>
+          </div>
+        }
+      >
+        <TrendingTopicContent />
+      </Suspense>
+    </div>
   );
 }

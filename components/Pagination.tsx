@@ -24,10 +24,10 @@ export function Pagination({
   if (totalHalaman <= 1) return null
 
   const dasar =
-    'min-w-10 h-10 px-3 inline-flex items-center justify-center rounded-xl text-sm font-semibold border transition-colors'
-  const aktif = 'bg-violet-600/40 border-fuchsia-400/50 text-white'
-  const biasa = 'bg-white/[0.04] border-white/[0.09] text-slate-300 hover:text-white hover:border-fuchsia-400/35'
-  const mati = 'bg-white/[0.02] border-white/[0.05] text-slate-600 pointer-events-none'
+    'min-w-10 h-10 px-3 inline-flex items-center justify-center rounded-lg text-sm font-bold border-2 transition-all'
+  const aktif = 'bg-cobalt border-ink text-white shadow-hard-sm'
+  const biasa = 'bg-white border-ink text-ink hover:bg-sun hover:-translate-y-0.5'
+  const mati = 'bg-transparent border-ink/15 text-ink/30 pointer-events-none'
 
   return (
     <nav aria-label="Halaman" className="flex flex-wrap items-center justify-center gap-2 pt-4">
@@ -41,7 +41,7 @@ export function Pagination({
 
       {daftarHalaman(halaman, totalHalaman).map((h, i) =>
         h === '...' ? (
-          <span key={`titik-${i}`} className="px-1 text-slate-500">
+          <span key={`titik-${i}`} className="px-1 text-ink/50">
             …
           </span>
         ) : (

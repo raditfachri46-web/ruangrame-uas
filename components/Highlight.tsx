@@ -14,7 +14,7 @@ export function Highlight({ teks, kataKunci }: { teks: string; kataKunci: string
     <>
       {bagian.map((b, i) =>
         i % 2 === 1 ? (
-          <mark key={i} className="rounded bg-amber-400/25 text-amber-200 px-0.5">
+          <mark key={i} className="rounded bg-sun/50 text-ink px-0.5">
             {b}
           </mark>
         ) : (
