@@ -1,30 +1,21 @@
 import type { ReactNode } from 'react'
 import { Navbar } from '@/components/Navbar'
 
-export function Footer() {
-  return (
-    <footer className="border-t-2 border-ink bg-ink text-paper mt-16">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="font-display text-2xl font-extrabold tracking-tight">RuangRame</p>
-          <p className="text-sm text-paper/65 mt-1 max-w-xs">
-            Forum diskusi kampus untuk tugas, mata kuliah, dan info yang perlu dibagi.
-          </p>
-        </div>
-        <p className="text-xs text-paper/50">Tetap sopan, satu topik per thread.</p>
-      </div>
-    </footer>
-  )
-}
-
 export function PageShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col text-ink">
-      <Navbar />
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-        {children}
-      </main>
-      <Footer />
+    <div className="min-h-screen bg-[#09080f] text-slate-100 relative overflow-hidden selection:bg-violet-500 selection:text-white">
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-600/15 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-rose-500/12 rounded-full blur-[120px] pointer-events-none"></div>
+
+      <div className="relative z-10 flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          {children}
+        </main>
+        <footer className="border-t border-white/[0.07] py-6 text-center text-xs text-slate-500">
+          RuangRame &middot; Forum Diskusi Kampus
+        </footer>
+      </div>
     </div>
   )
 }

@@ -1,17 +1,10 @@
-import { Suspense, type CSSProperties } from 'react';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { connection } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ThreadCard } from '@/components/ThreadCard';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/PageShell';
 import { logoutUser } from '@/app/actions/auth';
-import { ambilCuplikan, warnaKategori } from '@/lib/format';
-
-const LATAR_TEMPELAN = ['bg-sun', 'bg-white', 'bg-mint/30'];
-const MIRING = ['-2.2deg', '1.6deg', '-1deg'];
-const GESER = ['', 'lg:ml-10', 'lg:ml-4'];
 
 async function ForumContent() {
   await connection();
@@ -19,7 +12,7 @@ async function ForumContent() {
   const cookieStore = await cookies();
   const currentUser = cookieStore.get('ruangrame_user')?.value;
 
-  let categories: { id: number; nama: string; slug: string; _count: { threads: number } }[] = [];
+  let categories: { id: number; nama: string; slug: string }[] = [];
   let threads: {
     id: number;
     judul: string;
@@ -27,280 +20,252 @@ async function ForumContent() {
     penulis: string;
     views: number;
     createdAt: Date;
-    gambarUrl: string | null;
     kategori: { nama: string } | null;
   }[] = [];
-  let totalThread = 0;
   let isConnected = true;
 
   try {
-    categories = await prisma.kategori.findMany({
-      include: { _count: { select: { threads: true } } },
-    });
+    categories = await prisma.kategori.findMany();
     threads = await prisma.thread.findMany({
       include: { kategori: true },
       orderBy: { createdAt: 'desc' },
       take: 10,
     });
-    totalThread = await prisma.thread.count();
   } catch {
     isConnected = false;
   }
 
-  const papan = threads.slice(0, 3);
-  const [sorotan, ...lainnya] = threads;
-
-  const aksiAkun = currentUser ? (
-    <div className="flex items-center gap-2">
-      <span className="hidden sm:inline px-3 py-1.5 rounded-lg bg-sun border-2 border-ink text-sm font-bold">
-        @{currentUser}
-      </span>
-      <form action={logoutUser}>
-        <button
-          type="submit"
-          className="px-3 py-2 rounded-lg text-sm font-semibold text-ink/70 hover:text-coral transition-colors"
-        >
-          Keluar
-        </button>
-      </form>
-    </div>
-  ) : (
-    <div className="flex items-center gap-1">
-      <Link
-        href="/login"
-        className="px-3 py-2 rounded-lg text-sm font-semibold text-ink/70 hover:text-ink transition-colors"
-      >
-        Masuk
-      </Link>
-      <Link
-        href="/register"
-        className="hidden sm:inline px-3 py-2 rounded-lg text-sm font-semibold text-ink hover:bg-sun transition-colors"
-      >
-        Daftar
-      </Link>
-    </div>
-  );
-
   return (
     <>
-      <Navbar isConnected={isConnected} aksi={aksiAkun} />
+      {/* Glass Navbar */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#09080f]/75 border-b border-white/[0.09] shadow-2xl">
+        <div className="max-w-6xl mx-auto px-6 min-h-20 py-3 flex flex-wrap items-center justify-between gap-3">
+          <Link href="/" className="flex items-center space-x-3.5 group">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-amber-400 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-violet-500/25 border border-white/25 group-hover:scale-105 transition-transform">
+              R
+            </div>
+            <span className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-white via-violet-100 to-fuchsia-300 bg-clip-text text-transparent">
+              RuangRame
+            </span>
+          </Link>
 
-      {/* Hero: pernyataan di kiri, papan tempelan dari diskusi nyata di kanan */}
-      <section className="border-b-2 border-ink">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14 grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-14 items-center">
-          <div>
-            <h1 className="font-display font-extrabold text-ink text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
-              Tanya tugas, bahas matkul, bagi info.
-            </h1>
-            <p className="mt-5 text-lg text-ink/75 leading-relaxed max-w-md">
-              Forum diskusi untuk anak kampus. Satu tempat untuk pertanyaan yang biasanya cuma beredar di grup chat.
-            </p>
-
-            <div className="mt-7 flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <nav className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-semibold">
               <Link
-                href="/buat-thread"
-                className="btn-hard rounded-lg bg-cobalt text-white font-bold px-6 py-3"
+                href="/"
+                className="px-3.5 py-2 rounded-full bg-violet-500/20 text-violet-200 border border-violet-400/30"
               >
-                Mulai diskusi
+                Beranda
+              </Link>
+              <Link
+                href="/kategori"
+                className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all"
+              >
+                Kategori
+              </Link>
+              <Link
+                href="/tag-popular"
+                className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all"
+              >
+                Tag Populer
+              </Link>
+              <Link
+                href="/trending-topic"
+                className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all"
+              >
+                Trending
               </Link>
               <Link
                 href="/search"
-                className="btn-hard rounded-lg bg-white text-ink font-bold px-6 py-3"
+                className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all"
               >
-                Cari diskusi
+                Cari
               </Link>
+            </nav>
+
+            <div
+              className={`hidden xl:flex items-center space-x-2 px-3.5 py-2 rounded-full text-xs font-semibold backdrop-blur-md border ${
+                isConnected
+                  ? 'bg-emerald-500/10 border-emerald-400/30 text-emerald-300'
+                  : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+              }`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
+                }`}
+              />
+              <span>{isConnected ? 'DB Connected' : 'DB Error'}</span>
             </div>
 
-            {isConnected && (
-              <dl className="mt-9 flex flex-wrap gap-x-8 gap-y-3 text-ink">
-                <div className="flex items-baseline gap-2">
-                  <dt className="sr-only">Jumlah diskusi</dt>
-                  <dd className="font-display text-3xl font-extrabold">{totalThread}</dd>
-                  <span className="text-sm text-ink/65">diskusi</span>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <dt className="sr-only">Jumlah kategori</dt>
-                  <dd className="font-display text-3xl font-extrabold">{categories.length}</dd>
-                  <span className="text-sm text-ink/65">kategori</span>
-                </div>
-              </dl>
-            )}
-          </div>
-
-          <div className="relative" aria-label="Diskusi yang baru ditempel">
-            {papan.length > 0 ? (
-              <ul className="flex flex-col gap-5 py-2">
-                {papan.map((t, i) => {
-                  const warna = warnaKategori(t.kategori?.nama);
-                  return (
-                    <li
-                      key={t.id}
-                      className={`tempelan ${GESER[i]}`}
-                      style={
-                        {
-                          '--miring': MIRING[i],
-                          '--urut': i,
-                        } as CSSProperties
-                      }
-                    >
-                      <Link
-                        href={`/thread/${t.id}`}
-                        className={`relative block rounded-lg border-2 border-ink p-4 pt-5 shadow-hard-sm ${LATAR_TEMPELAN[i]}`}
-                      >
-                        <span
-                          aria-hidden
-                          className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-coral border-2 border-ink"
-                        />
-                        <span className="flex items-center gap-2 text-xs font-bold text-ink/70 mb-1.5">
-                          <span className={`w-2.5 h-2.5 rounded-full border border-ink ${warna.titik}`} />
-                          {t.kategori?.nama ?? 'Umum'}
-                        </span>
-                        <span className="block font-display font-bold text-lg leading-snug text-ink line-clamp-2">
-                          {t.judul}
-                        </span>
-                        <span className="block mt-1 text-sm text-ink/65 line-clamp-1">
-                          {ambilCuplikan(t.konten, '', 80)}
-                        </span>
-                        <span className="block mt-2.5 text-xs font-semibold text-ink/70">
-                          oleh {t.penulis}
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
+            {currentUser ? (
+              <div className="flex items-center gap-2">
+                <span className="px-3.5 py-2 rounded-full bg-fuchsia-500/15 border border-fuchsia-400/30 text-xs font-bold text-fuchsia-200">
+                  @{currentUser}
+                </span>
+                <form action={logoutUser}>
+                  <button
+                    type="submit"
+                    className="px-3.5 py-2 rounded-full bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 text-xs font-semibold text-rose-200 transition"
+                  >
+                    Logout
+                  </button>
+                </form>
+              </div>
             ) : (
-              <div className="tempelan rounded-lg border-2 border-ink bg-sun p-6 shadow-hard" style={{ '--miring': '-1.5deg' } as CSSProperties}>
-                <p className="font-display font-bold text-2xl leading-snug">
-                  Papan ini masih kosong.
-                </p>
-                <p className="mt-2 text-sm text-ink/75">
-                  Tempel diskusi pertama dan jadi yang memulai.
-                </p>
-                <Link href="/buat-thread" className="btn-hard inline-block mt-4 rounded-lg bg-white font-bold px-4 py-2 text-sm">
-                  Buat thread
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-xs font-semibold text-white transition"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-xs font-bold text-white shadow-md shadow-fuchsia-600/25 transition hover:opacity-95"
+                >
+                  Daftar
                 </Link>
               </div>
             )}
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* Kategori sebagai strip jelajah */}
-      {categories.length > 0 && (
-        <section aria-label="Kategori" className="border-b-2 border-ink bg-white">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3 overflow-x-auto">
-            <span className="shrink-0 font-display font-bold text-sm">Jelajah</span>
-            {categories.map((cat) => {
-              const warna = warnaKategori(cat.nama);
-              return (
-                <Link
-                  key={cat.id}
-                  href={`/kategori/${cat.slug}`}
-                  className="shrink-0 inline-flex items-center gap-2 rounded-full border-2 border-ink px-3.5 py-1.5 text-sm font-semibold hover:-translate-y-0.5 hover:bg-paper transition-all"
-                >
-                  <span className={`w-2.5 h-2.5 rounded-full border border-ink ${warna.titik}`} />
-                  {cat.nama}
-                  <span className="text-ink/50 text-xs font-bold">{cat._count.threads}</span>
-                </Link>
-              );
-            })}
-            <Link href="/kategori" className="shrink-0 text-sm font-bold text-cobalt hover:underline underline-offset-4 underline-offset-4 ml-1">
-              Semua kategori &rarr;
-            </Link>
-          </div>
-        </section>
-      )}
+      {/* Main Container */}
+      <main className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-4 gap-8 relative z-10">
+        {/* Left Sidebar: Glass Categories */}
+        <aside className="lg:col-span-1 space-y-6">
+          <div className="backdrop-blur-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/[0.09] border-t-white/20 rounded-3xl p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.45)]">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-fuchsia-300 flex items-center gap-2">
+                📂 Kategori Populer
+              </h3>
+              <Link
+                href="/kategori"
+                className="text-[11px] font-semibold text-violet-300 hover:text-amber-300 transition-colors"
+              >
+                Semua &rarr;
+              </Link>
+            </div>
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-10 grid lg:grid-cols-[1fr_17rem] gap-10">
-        <section aria-labelledby="judul-terbaru">
-          <div className="flex items-end justify-between gap-4 mb-5">
-            <h2 id="judul-terbaru" className="font-display text-3xl font-extrabold">
-              Diskusi terbaru
-            </h2>
-            <Link href="/trending-topic" className="text-sm font-bold text-cobalt hover:underline underline-offset-4 underline-offset-4">
-              Lihat yang trending &rarr;
-            </Link>
-          </div>
-
-          {sorotan ? (
-            <div className="space-y-5">
-              <ThreadCard thread={sorotan} variant="tile" />
-              {lainnya.length > 0 && (
-                <div className="grid gap-4">
-                  {lainnya.map((thread) => (
-                    <ThreadCard key={thread.id} thread={thread} />
-                  ))}
+            <div className="space-y-2">
+              {categories.length > 0 ? (
+                categories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    href={`/kategori/${cat.slug}`}
+                    className="flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-medium text-slate-300 hover:text-white hover:bg-violet-500/10 transition-all group border border-transparent hover:border-violet-400/25"
+                  >
+                    <span># {cat.nama}</span>
+                    <span className="text-[10px] px-2.5 py-1 rounded-full bg-violet-500/15 text-violet-300 border border-violet-400/25 group-hover:bg-fuchsia-500/20 group-hover:text-fuchsia-200 transition-colors">
+                      Hot
+                    </span>
+                  </Link>
+                ))
+              ) : (
+                <div className="space-y-3 py-2">
+                  <p className="text-sm text-slate-500 italic">Belum ada kategori.</p>
+                  <Link
+                    href="/kategori"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-violet-300 hover:text-fuchsia-300 transition-colors"
+                  >
+                    Buka halaman sub-forum &rarr;
+                  </Link>
                 </div>
               )}
             </div>
-          ) : (
-            <div className="rounded-xl border-2 border-dashed border-ink/40 bg-white p-10 text-center">
-              <h3 className="font-display text-xl font-bold mb-1">
-                {isConnected ? 'Belum ada diskusi' : 'Diskusi belum bisa dimuat'}
-              </h3>
-              <p className="text-sm text-ink/65 max-w-xs mx-auto mb-5">
-                {isConnected
-                  ? 'Buat thread pertama dan buka obrolan di RuangRame.'
-                  : 'Koneksi ke database bermasalah. Muat ulang halaman sebentar lagi.'}
-              </p>
-              {isConnected && (
-                <Link href="/buat-thread" className="btn-hard inline-block rounded-lg bg-cobalt text-white font-bold px-5 py-2.5 text-sm">
-                  Buat thread
-                </Link>
-              )}
-            </div>
-          )}
-        </section>
-
-        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-xl border-2 border-ink bg-white p-5 shadow-hard-sm">
-            <h3 className="font-display font-bold text-lg mb-3">Kategori</h3>
-            {categories.length > 0 ? (
-              <ul className="-mx-2">
-                {categories.map((cat) => {
-                  const warna = warnaKategori(cat.nama);
-                  return (
-                    <li key={cat.id}>
-                      <Link
-                        href={`/kategori/${cat.slug}`}
-                        className="flex items-center gap-3 px-2 py-2 rounded-lg text-sm font-semibold hover:bg-paper transition-colors group"
-                      >
-                        <span className={`w-3 h-3 rounded-full border border-ink ${warna.titik}`} />
-                        <span className="flex-1 truncate">{cat.nama}</span>
-                        <span className="text-xs text-ink/50 group-hover:text-ink">{cat._count.threads}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="text-sm text-ink/60">Belum ada kategori.</p>
-            )}
           </div>
 
-          <div className="rounded-xl border-2 border-ink bg-sun p-5 -rotate-1">
-            <h3 className="font-display font-bold text-lg mb-1">Aturan main</h3>
-            <p className="text-sm text-ink/80 leading-relaxed">
-              Jaga kesopanan antar sesama anggota dan pilih kategori yang tepat supaya diskusimu mudah ditemukan.
+          <div className="backdrop-blur-2xl bg-gradient-to-br from-violet-950/35 via-fuchsia-950/20 to-amber-950/15 border border-violet-400/25 border-t-white/15 rounded-3xl p-6 text-sm text-slate-300 shadow-xl">
+            <h4 className="font-bold text-white mb-1 flex items-center gap-2">💡 Tips Mahasiswa</h4>
+            <p className="text-xs text-slate-300/80 leading-relaxed">
+              Eksplorasi diskusi seru tanpa batas, tetap jaga kesopanan antar sesama anggota ya!
             </p>
           </div>
         </aside>
-      </main>
 
-      <Footer />
+        {/* Right Content: Feed */}
+        <section className="lg:col-span-3 space-y-6">
+          {/* Glass Hero Banner */}
+          <div className="relative overflow-hidden backdrop-blur-2xl bg-gradient-to-br from-violet-950/45 via-fuchsia-950/25 to-zinc-900/50 border border-white/[0.1] border-t-white/25 rounded-3xl p-8 sm:p-10 shadow-2xl">
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-fuchsia-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 max-w-xl">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-violet-500/15 border border-violet-400/25 text-violet-200 text-xs font-semibold mb-4 backdrop-blur-md">
+                ✨ Forum Diskusi Kampus
+              </span>
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white mb-3">
+                Ngobrol Santai & Berbagi Info Tanpa Batas
+              </h1>
+              <p className="text-sm sm:text-base text-slate-300/85 leading-relaxed mb-6">
+                Wadah kolaborasi anak kuliah untuk nanya tugas, diskusi seputar mata kuliah, hingga berbagi info penting seputar kampus.
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href="/buat-thread"
+                  className="px-6 py-3 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-rose-400 text-white font-semibold text-sm shadow-lg shadow-fuchsia-600/30 transition-all transform active:scale-95 border border-white/25"
+                >
+                  + Buat Diskusi Baru
+                </Link>
+                <Link
+                  href="/kategori"
+                  className="px-5 py-3 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-200 hover:text-white font-semibold text-sm border border-white/15 backdrop-blur-md transition-all"
+                >
+                  📂 Jelajahi Kategori
+                </Link>
+                <Link
+                  href="/search"
+                  className="px-5 py-3 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-200 hover:text-white font-semibold text-sm border border-white/15 backdrop-blur-md transition-all"
+                >
+                  🔍 Cari Diskusi
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Section Header */}
+          <div className="flex items-center justify-between pt-2 px-1">
+            <h2 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+              🔥 Diskusi Terbaru
+            </h2>
+            <span className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-violet-500/10 text-violet-200 border border-violet-400/20 backdrop-blur-md">
+              Total: {threads.length} Diskusi
+            </span>
+          </div>
+
+          {/* Thread Feed Cards */}
+          <div className="space-y-4">
+            {threads.length > 0 ? (
+              threads.map((thread) => <ThreadCard key={thread.id} thread={thread} />)
+            ) : (
+              <div className="text-center py-20 backdrop-blur-2xl bg-white/[0.03] border border-white/[0.09] border-t-white/15 rounded-3xl p-8 shadow-2xl">
+                <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-400/20 flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
+                  📭
+                </div>
+                <h4 className="font-semibold text-white mb-1">Belum ada thread diskusi</h4>
+                <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
+                  Jadilah yang pertama membuat topik diskusi baru di forum RuangRame ini!
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
     </>
   );
 }
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col text-ink">
+    <div className="min-h-screen bg-[#09080f] text-slate-100 relative overflow-hidden selection:bg-violet-500 selection:text-white">
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-600/15 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-rose-500/12 rounded-full blur-[120px] pointer-events-none" />
+
       <Suspense
         fallback={
-          <div className="flex-1 min-h-screen flex flex-col items-center justify-center gap-4 text-ink/65">
-            <div className="w-10 h-10 rounded-lg border-4 border-ink/15 border-t-cobalt animate-spin" />
-            <p className="text-sm font-semibold">Memuat RuangRame...</p>
+          <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-slate-400">
+            <div className="w-10 h-10 rounded-2xl border-2 border-violet-500/30 border-t-fuchsia-400 animate-spin" />
+            <p className="text-sm font-medium tracking-wide">Memuat forum RuangRame...</p>
           </div>
         }
       >

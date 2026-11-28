@@ -26,7 +26,7 @@ export function BagikanTombol({ judul }: { judul: string }) {
     <button
       type="button"
       onClick={bagikan}
-      className="px-4 py-2.5 rounded-lg bg-white hover:bg-paper border border-ink/20 hover:border-cobalt/40 text-sm font-semibold text-ink transition-all active:scale-95"
+      className="px-4 py-2.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] hover:border-fuchsia-400/35 text-sm font-semibold text-slate-200 transition-all active:scale-95"
     >
       {status === 'tersalin' ? '✅ Link tersalin!' : status === 'gagal' ? '⚠️ Gagal menyalin' : '🔗 Bagikan'}
     </button>

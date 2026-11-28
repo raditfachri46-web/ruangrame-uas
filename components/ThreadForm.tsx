@@ -28,7 +28,7 @@ const formatUkuran = (bytes: number): string =>
 function Penghitung({ nilai, maks }: { nilai: number; maks: number }) {
   const hampir = nilai >= maks * 0.9
   return (
-    <span className={`text-[11px] tabular-nums ${hampir ? 'text-ink' : 'text-ink/55'}`}>
+    <span className={`text-[11px] tabular-nums ${hampir ? 'text-amber-300' : 'text-slate-500'}`}>
       {nilai}/{maks}
     </span>
   )
@@ -37,7 +37,7 @@ function Penghitung({ nilai, maks }: { nilai: number; maks: number }) {
 function PesanError({ id, pesan }: { id: string; pesan?: string }) {
   if (!pesan) return null
   return (
-    <p id={id} role="alert" className="mt-1.5 text-xs text-coral">
+    <p id={id} role="alert" className="mt-1.5 text-xs text-rose-300">
       {pesan}
     </p>
   )
@@ -211,8 +211,8 @@ export function ThreadForm({
 
   const kategoriTerpilih = kategori.find((k) => String(k.id) === values.kategoriId)
   const kelasInput = (field: FieldThread) =>
-    `w-full rounded-lg bg-white border px-4 py-3 text-sm text-ink placeholder:text-ink/45 outline-none transition-colors focus:bg-white ${
-      pesan(field) ? 'border-coral/50 focus:border-coral' : 'border-ink/20 focus:border-cobalt/40'
+    `w-full rounded-2xl bg-white/[0.05] border px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none transition-colors focus:bg-white/[0.08] ${
+      pesan(field) ? 'border-rose-400/60 focus:border-rose-400' : 'border-white/[0.1] focus:border-fuchsia-400/60'
     }`
 
   return (
@@ -221,19 +221,19 @@ export function ThreadForm({
         action={formAction}
         onSubmit={saatKirim}
         noValidate
-        className="lg:col-span-2 space-y-6 border border-ink/20 rounded-xl p-6 sm:p-8 shadow-hard-sm"
+        className="lg:col-span-2 space-y-6 backdrop-blur-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/[0.09] border-t-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl"
       >
         {draftDipulihkan && (
-          <div className="flex items-center justify-between gap-3 rounded-lg bg-sun/50 border border-sun px-4 py-3 text-xs text-ink">
+          <div className="flex items-center justify-between gap-3 rounded-2xl bg-amber-500/10 border border-amber-400/25 px-4 py-3 text-xs text-amber-200">
             <span>📝 Draf terakhirmu dipulihkan otomatis.</span>
-            <button type="button" onClick={hapusDraft} className="font-semibold underline hover:text-cobalt">
+            <button type="button" onClick={hapusDraft} className="font-semibold underline hover:text-white">
               Hapus draf
             </button>
           </div>
         )}
 
         {state.errors.form && (
-          <div role="alert" className="rounded-lg bg-coral/15 border border-coral/50 px-4 py-3 text-sm text-coral">
+          <div role="alert" className="rounded-2xl bg-rose-500/10 border border-rose-400/30 px-4 py-3 text-sm text-rose-200">
             {state.errors.form}
           </div>
         )}
@@ -248,7 +248,7 @@ export function ThreadForm({
 
         {/* Kategori */}
         <fieldset aria-describedby="err-kategoriId">
-          <legend className="text-sm font-semibold text-ink mb-2">Kategori</legend>
+          <legend className="text-sm font-semibold text-slate-200 mb-2">Kategori</legend>
           <div className="flex flex-wrap gap-2">
             {kategori.map((k, i) => (
               <label key={k.id} className="cursor-pointer">
@@ -262,7 +262,7 @@ export function ThreadForm({
                   onBlur={sentuh('kategoriId')}
                   className="peer sr-only"
                 />
-                <span className="inline-block px-4 py-2 rounded-lg text-sm font-medium border border-ink/20 bg-white text-ink/80 hover:border-cobalt/40 peer-checked:bg-cobalt/10 peer-checked:border-cobalt/40 peer-checked:text-cobalt peer-focus-visible:ring-2 peer-focus-visible:ring-cobalt transition-colors">
+                <span className="inline-block px-4 py-2 rounded-xl text-sm font-medium border border-white/[0.1] bg-white/[0.04] text-slate-300 hover:border-fuchsia-400/40 peer-checked:bg-fuchsia-500/20 peer-checked:border-fuchsia-400/60 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-fuchsia-400 transition-colors">
                   # {k.nama}
                 </span>
               </label>
@@ -274,7 +274,7 @@ export function ThreadForm({
         {/* Judul */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label htmlFor="field-judul" className="text-sm font-semibold text-ink">
+            <label htmlFor="field-judul" className="text-sm font-semibold text-slate-200">
               Judul diskusi
             </label>
             <Penghitung nilai={values.judul.length} maks={BATAS.judulMax} />
@@ -298,11 +298,11 @@ export function ThreadForm({
         {/* Isi */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label htmlFor="field-konten" className="text-sm font-semibold text-ink">
+            <label htmlFor="field-konten" className="text-sm font-semibold text-slate-200">
               Isi diskusi
             </label>
             <div className="flex items-center gap-3">
-              <div className="inline-flex rounded-xl bg-white border border-ink/20 p-0.5 text-xs font-semibold">
+              <div className="inline-flex rounded-xl bg-white/[0.05] border border-white/[0.1] p-0.5 text-xs font-semibold">
                 {(['tulis', 'pratinjau'] as const).map((m) => (
                   <button
                     key={m}
@@ -310,7 +310,7 @@ export function ThreadForm({
                     onClick={() => setMode(m)}
                     aria-pressed={mode === m}
                     className={`px-3 py-1.5 rounded-lg capitalize transition-colors ${
-                      mode === m ? 'bg-cobalt/10 text-ink' : 'text-ink/65 hover:text-cobalt'
+                      mode === m ? 'bg-violet-600/50 text-white' : 'text-slate-400 hover:text-white'
                     }`}
                   >
                     {m}
@@ -336,15 +336,15 @@ export function ThreadForm({
             className={`${kelasInput('konten')} resize-y ${mode === 'tulis' ? '' : 'hidden'}`}
           />
           {mode === 'pratinjau' && (
-            <div className="rounded-lg bg-ink/5 border border-ink/20 p-5 min-h-[16rem]">
+            <div className="rounded-2xl bg-black/20 border border-white/[0.1] p-5 min-h-[16rem]">
               {values.judul || values.konten ? (
                 <>
                   {kategoriTerpilih && (
-                    <span className="inline-block px-3 py-1 rounded-xl bg-cobalt/10 text-cobalt text-xs font-semibold border border-cobalt/40 mb-3">
+                    <span className="inline-block px-3 py-1 rounded-xl bg-fuchsia-500/15 text-fuchsia-300 text-xs font-semibold border border-fuchsia-400/25 mb-3">
                       # {kategoriTerpilih.nama}
                     </span>
                   )}
-                  <h3 className="text-xl font-bold text-ink mb-3 break-words">
+                  <h3 className="text-xl font-bold text-white mb-3 break-words">
                     {values.judul || '(Belum ada judul)'}
                   </h3>
                   <KontenTeks teks={values.konten || '(Belum ada isi)'} />
@@ -353,12 +353,12 @@ export function ThreadForm({
                     <img
                       src={previewUrl}
                       alt="Pratinjau gambar lampiran"
-                      className="mt-4 max-h-96 w-auto max-w-full rounded-lg border border-ink/20"
+                      className="mt-4 max-h-96 w-auto max-w-full rounded-2xl border border-white/[0.1]"
                     />
                   )}
                 </>
               ) : (
-                <p className="text-sm text-ink/55 italic">Belum ada yang bisa dipratinjau.</p>
+                <p className="text-sm text-slate-500 italic">Belum ada yang bisa dipratinjau.</p>
               )}
             </div>
           )}
@@ -367,8 +367,8 @@ export function ThreadForm({
 
         {/* Gambar (opsional) */}
         <div>
-          <label htmlFor="field-gambar" className="block text-sm font-semibold text-ink mb-2">
-            Gambar <span className="font-normal text-ink/55">(opsional)</span>
+          <label htmlFor="field-gambar" className="block text-sm font-semibold text-slate-200 mb-2">
+            Gambar <span className="font-normal text-slate-500">(opsional)</span>
           </label>
           <input
             ref={inputGambar}
@@ -379,27 +379,27 @@ export function ThreadForm({
             onChange={saatPilihGambar}
             aria-invalid={Boolean(pesanGambar)}
             aria-describedby="err-gambar info-gambar"
-            className="block w-full text-sm text-ink/80 file:mr-4 file:cursor-pointer file:rounded-xl file:border file:border-ink/20 file:bg-white file:px-4 file:py-2 file:text-sm file:font-semibold file:text-ink hover:file:bg-sun rounded-lg bg-white border border-dashed border-ink/20 p-3"
+            className="block w-full text-sm text-slate-300 file:mr-4 file:cursor-pointer file:rounded-xl file:border file:border-white/[0.15] file:bg-white/[0.07] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-white/[0.12] rounded-2xl bg-white/[0.03] border border-dashed border-white/[0.15] p-3"
           />
-          <p id="info-gambar" className="mt-1.5 text-[11px] text-ink/55">
+          <p id="info-gambar" className="mt-1.5 text-[11px] text-slate-500">
             JPG, PNG, WebP, atau GIF. Maksimal {BATAS.gambarMaxBytes / (1024 * 1024)} MB.
           </p>
           <PesanError id="err-gambar" pesan={pesanGambar} />
           {gambar && previewUrl && (
-            <div className="mt-3 flex items-start gap-4 rounded-lg bg-ink/5 border border-ink/20 p-3">
+            <div className="mt-3 flex items-start gap-4 rounded-2xl bg-black/20 border border-white/[0.1] p-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewUrl}
                 alt="Pratinjau gambar yang dipilih"
-                className="h-24 w-24 shrink-0 rounded-xl object-cover border border-ink/20"
+                className="h-24 w-24 shrink-0 rounded-xl object-cover border border-white/[0.1]"
               />
-              <div className="min-w-0 flex-1 text-xs text-ink/80">
-                <p className="truncate font-semibold text-ink">{gambar.name}</p>
-                <p className="mt-0.5 text-ink/55">{formatUkuran(gambar.size)}</p>
+              <div className="min-w-0 flex-1 text-xs text-slate-300">
+                <p className="truncate font-semibold text-white">{gambar.name}</p>
+                <p className="mt-0.5 text-slate-500">{formatUkuran(gambar.size)}</p>
                 <button
                   type="button"
                   onClick={hapusGambar}
-                  className="mt-2 font-semibold text-coral underline hover:text-coral"
+                  className="mt-2 font-semibold text-rose-300 underline hover:text-rose-200"
                 >
                   Hapus gambar
                 </button>
@@ -411,7 +411,7 @@ export function ThreadForm({
         {/* Penulis */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label htmlFor="field-penulis" className="text-sm font-semibold text-ink">
+            <label htmlFor="field-penulis" className="text-sm font-semibold text-slate-200">
               Nama kamu
             </label>
             <Penghitung nilai={values.penulis.length} maks={BATAS.penulisMax} />
@@ -436,17 +436,17 @@ export function ThreadForm({
         <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
           <Link
             href="/"
-            className="px-5 py-3 rounded-lg bg-white hover:bg-paper border border-ink/20 text-sm font-semibold text-ink transition-all"
+            className="px-5 py-3 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-sm font-semibold text-slate-200 transition-all"
           >
             Batal
           </Link>
           <button
             type="submit"
             disabled={isPending}
-            className="px-6 py-3 rounded-lg bg-cobalt disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm  transition-all   inline-flex items-center gap-2"
+            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-rose-400 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm shadow-lg shadow-fuchsia-600/30 transition-all active:scale-95 border border-white/25 inline-flex items-center gap-2"
           >
             {isPending && (
-              <span className="w-4 h-4 rounded-full border-2 border-ink/20 border-t-white animate-spin"></span>
+              <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin"></span>
             )}
             {isPending ? (gambar ? 'Mengunggah...' : 'Memposting...') : 'Posting Diskusi'}
           </button>
@@ -455,16 +455,16 @@ export function ThreadForm({
 
       {/* Sidebar tips */}
       <aside className="space-y-6">
-        <div className=" border border-cobalt/40 rounded-xl p-6 text-sm text-ink/80 shadow-hard-sm">
-          <h2 className="font-bold text-ink mb-3">💡 Tips diskusi yang seru</h2>
-          <ul className="space-y-2.5 text-xs text-ink/80 leading-relaxed list-disc pl-4">
+        <div className="backdrop-blur-2xl bg-gradient-to-br from-violet-950/35 via-fuchsia-950/20 to-amber-950/15 border border-violet-400/25 rounded-3xl p-6 text-sm text-slate-300 shadow-xl">
+          <h2 className="font-bold text-white mb-3">💡 Tips diskusi yang seru</h2>
+          <ul className="space-y-2.5 text-xs text-slate-300/90 leading-relaxed list-disc pl-4">
             <li>Pakai judul yang spesifik, bukan sekadar &quot;tanya dong&quot;.</li>
             <li>Sebutkan mata kuliah atau konteksnya biar mudah dijawab.</li>
             <li>Cek dulu lewat pencarian, siapa tahu topiknya sudah ada.</li>
             <li>Gunakan bahasa yang sopan ke sesama anggota.</li>
           </ul>
         </div>
-        <div className="rounded-xl bg-white border border-ink/20 p-6 text-xs text-ink/65 leading-relaxed">
+        <div className="rounded-3xl bg-white/[0.03] border border-white/[0.09] p-6 text-xs text-slate-400 leading-relaxed">
           Draf tulisanmu tersimpan otomatis di browser ini, jadi aman kalau tab tidak sengaja
           tertutup.
         </div>

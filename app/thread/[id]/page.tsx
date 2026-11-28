@@ -14,7 +14,6 @@ import {
   inisial,
   waktuRelatif,
   warnaAvatar,
-  warnaKategori,
 } from '@/lib/format'
 
 const ID_MAKS = 2147483647 // batas Int di PostgreSQL
@@ -45,13 +44,13 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
     if (thread) terkait = await ambilTerkait(thread.kategoriId, thread.id)
   } catch {
     return (
-      <div className="max-w-3xl mx-auto text-center py-20 rounded-xl bg-white border border-coral/50 p-8">
+      <div className="max-w-3xl mx-auto text-center py-20 rounded-3xl bg-white/[0.03] border border-rose-500/30 p-8">
         <div className="text-3xl mb-3">🔌</div>
-        <h1 className="font-semibold text-ink mb-1">Gagal memuat diskusi</h1>
-        <p className="text-sm text-ink/65 mb-5">
+        <h1 className="font-semibold text-white mb-1">Gagal memuat diskusi</h1>
+        <p className="text-sm text-slate-400 mb-5">
           Koneksi ke database bermasalah. Coba muat ulang halaman ini beberapa saat lagi.
         </p>
-        <Link href="/" className="text-cobalt hover:text-ink text-sm font-semibold">
+        <Link href="/" className="text-fuchsia-300 hover:text-amber-300 text-sm font-semibold">
           &larr; Kembali ke beranda
         </Link>
       </div>
@@ -65,43 +64,41 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
       <ViewCounter threadId={thread.id} />
 
       {/* Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-ink/65 min-w-0">
-        <Link href="/" className="hover:text-cobalt transition-colors shrink-0">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-slate-400 min-w-0">
+        <Link href="/" className="hover:text-white transition-colors shrink-0">
           Beranda
         </Link>
         <span>/</span>
         <Link
           href={`/kategori/${encodeURIComponent(thread.kategori.slug)}`}
-          className="hover:text-cobalt transition-colors shrink-0"
+          className="hover:text-white transition-colors shrink-0"
         >
           {thread.kategori.nama}
         </Link>
         <span>/</span>
-        <span className="truncate text-ink/80">{thread.judul}</span>
+        <span className="truncate text-slate-300">{thread.judul}</span>
       </nav>
 
-      <article className="bg-white border-2 border-ink rounded-xl overflow-hidden shadow-hard">
-        <div className={`h-3 ${warnaKategori(thread.kategori.nama).bar}`} />
-        <div className="p-6 sm:p-9">
+      <article className="backdrop-blur-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/[0.09] border-t-white/20 rounded-3xl p-6 sm:p-9 shadow-2xl">
         <Link
           href={`/kategori/${encodeURIComponent(thread.kategori.slug)}`}
-          className={`inline-block px-2.5 py-0.5 rounded-md text-xs font-bold border hover:-translate-y-0.5 transition-transform ${warnaKategori(thread.kategori.nama).chip}`}
+          className="inline-block px-3 py-1 rounded-xl bg-fuchsia-500/15 text-fuchsia-300 text-xs font-semibold border border-fuchsia-400/25 hover:bg-fuchsia-500/25 transition-colors"
         >
           # {thread.kategori.nama}
         </Link>
 
-        <h1 className="mt-4 font-display text-3xl sm:text-5xl font-extrabold leading-[1.05] text-ink break-words">
+        <h1 className="mt-4 text-2xl sm:text-4xl font-black tracking-tight text-white break-words">
           {thread.judul}
         </h1>
 
-        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3 text-xs text-ink/65">
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3 text-xs text-slate-400">
           <span className="flex items-center gap-2.5">
             <span
-              className={`w-9 h-9 rounded-full ${warnaAvatar(thread.penulis)} flex items-center justify-center text-sm font-bold border-2 border-ink`}
+              className={`w-9 h-9 rounded-full bg-gradient-to-br ${warnaAvatar(thread.penulis)} flex items-center justify-center text-sm font-bold text-white border border-white/20`}
             >
               {inisial(thread.penulis)}
             </span>
-            <span className="text-sm font-semibold text-ink">{thread.penulis}</span>
+            <span className="text-sm font-semibold text-slate-200">{thread.penulis}</span>
           </span>
           <time dateTime={thread.createdAt.toISOString()} title={formatTanggalJam(thread.createdAt)}>
             🕒 {waktuRelatif(thread.createdAt)}
@@ -110,9 +107,9 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
           <span>📖 {estimasiBaca(thread.konten)} menit baca</span>
         </div>
 
-        <p className="mt-1 text-[11px] text-ink/55">{formatTanggalJam(thread.createdAt)}</p>
+        <p className="mt-1 text-[11px] text-slate-500">{formatTanggalJam(thread.createdAt)}</p>
 
-        <hr className="my-6 border-t-2 border-dashed border-ink/25" />
+        <hr className="my-6 border-white/[0.08]" />
 
         <KontenTeks teks={thread.konten} />
 
@@ -129,26 +126,25 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
               src={thread.gambarUrl}
               alt={`Gambar lampiran untuk diskusi: ${thread.judul}`}
               loading="lazy"
-              className="max-h-[32rem] w-auto max-w-full rounded-lg border border-ink/20"
+              className="max-h-[32rem] w-auto max-w-full rounded-2xl border border-white/[0.1]"
             />
           </a>
         )}
 
-        <div className="mt-8 pt-6 border-t border-ink/20 flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-8 pt-6 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/"
-            className="px-4 py-2.5 rounded-lg bg-white hover:bg-paper border border-ink/20 text-sm font-semibold text-ink transition-all"
+            className="px-4 py-2.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-sm font-semibold text-slate-200 transition-all"
           >
             &larr; Kembali
           </Link>
           <BagikanTombol judul={thread.judul} />
         </div>
-        </div>
       </article>
 
       {/* Thread terkait */}
       <section aria-labelledby="judul-terkait" className="space-y-4">
-        <h2 id="judul-terkait" className="text-lg font-bold text-ink">
+        <h2 id="judul-terkait" className="text-lg font-bold text-white">
           🔥 Diskusi lain di {thread.kategori.nama}
         </h2>
         {terkait.length > 0 ? (
@@ -158,9 +154,9 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
             ))}
           </div>
         ) : (
-          <div className="rounded-xl bg-white border border-ink/20 p-6 text-sm text-ink/65">
+          <div className="rounded-3xl bg-white/[0.03] border border-white/[0.09] p-6 text-sm text-slate-400">
             Belum ada diskusi lain di kategori ini.{' '}
-            <Link href="/buat-thread" className="text-cobalt hover:text-ink font-semibold">
+            <Link href="/buat-thread" className="text-fuchsia-300 hover:text-amber-300 font-semibold">
               Jadi yang pertama membuat!
             </Link>
           </div>
@@ -182,15 +178,15 @@ function ambilTerkait(kategoriId: number, kecualiId: number) {
 function ThreadSkeleton() {
   return (
     <div className="max-w-3xl mx-auto animate-pulse space-y-6" aria-busy="true">
-      <div className="h-4 w-56 rounded bg-white"></div>
-      <div className="rounded-xl bg-white border border-ink/20 p-9 space-y-5">
-        <div className="h-6 w-28 rounded-xl bg-white"></div>
-        <div className="h-9 w-4/5 rounded bg-white"></div>
-        <div className="h-9 w-48 rounded bg-white"></div>
+      <div className="h-4 w-56 rounded bg-white/10"></div>
+      <div className="rounded-3xl bg-white/[0.04] border border-white/[0.09] p-9 space-y-5">
+        <div className="h-6 w-28 rounded-xl bg-white/10"></div>
+        <div className="h-9 w-4/5 rounded bg-white/10"></div>
+        <div className="h-9 w-48 rounded bg-white/10"></div>
         <div className="space-y-3 pt-4">
-          <div className="h-4 rounded bg-white"></div>
-          <div className="h-4 rounded bg-white"></div>
-          <div className="h-4 w-2/3 rounded bg-white"></div>
+          <div className="h-4 rounded bg-white/10"></div>
+          <div className="h-4 rounded bg-white/10"></div>
+          <div className="h-4 w-2/3 rounded bg-white/10"></div>
         </div>
       </div>
     </div>

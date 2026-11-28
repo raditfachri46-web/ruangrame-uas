@@ -6,7 +6,7 @@ export function KontenTeks({ teks }: { teks: string }) {
   const bagian = teks.split(REGEX_URL) // indeks ganjil = URL
 
   return (
-    <div className="whitespace-pre-wrap break-words leading-relaxed text-ink">
+    <div className="whitespace-pre-wrap break-words leading-relaxed text-slate-200">
       {bagian.map((b, i) => {
         if (i % 2 === 0) return b
         const url = b.replace(/[.,;:!?)\]]+$/, '') // buang tanda baca di ujung
@@ -17,7 +17,7 @@ export function KontenTeks({ teks }: { teks: string }) {
               href={url}
               target="_blank"
               rel="noopener noreferrer nofollow ugc"
-              className="text-cobalt underline underline-offset-2 hover:text-ink break-all"
+              className="text-fuchsia-300 underline underline-offset-2 hover:text-amber-300 break-all"
             >
               {url}
             </a>
