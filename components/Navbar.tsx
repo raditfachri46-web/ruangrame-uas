@@ -1,11 +1,8 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
-import { getCurrentUser } from '@/lib/session'
-import { logoutUser } from '@/app/actions/auth'
-import { NotificationBell } from '@/components/NotificationBell'
+import { NavbarUserArea, NavbarUserAreaFallback } from '@/components/NavbarUserArea'
 
-export async function Navbar({ isConnected }: { isConnected?: boolean }) {
-  const user = await getCurrentUser()
-
+export function Navbar({ isConnected }: { isConnected?: boolean }) {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#09080f]/75 border-b border-white/[0.09] shadow-2xl">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
@@ -34,11 +31,6 @@ export async function Navbar({ isConnected }: { isConnected?: boolean }) {
           <Link href="/leaderboard" className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
             🏆 Leaderboard
           </Link>
-          {(user?.role === 'MODERATOR' || user?.role === 'ADMIN') && (
-            <Link href="/moderasi" className="px-3.5 py-2 rounded-full text-amber-300 hover:text-amber-200 hover:bg-amber-500/10 transition-all">
-              🛡️ Moderasi
-            </Link>
-          )}
         </nav>
 
         <form
@@ -85,8 +77,6 @@ export async function Navbar({ isConnected }: { isConnected?: boolean }) {
             </div>
           )}
 
-          {user && <NotificationBell userId={user.id} />}
-
           <Link
             href="/buat-thread"
             className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-rose-400 text-white font-semibold text-sm shadow-lg shadow-fuchsia-600/25 transition-all active:scale-95 border border-white/25 whitespace-nowrap"
@@ -94,30 +84,9 @@ export async function Navbar({ isConnected }: { isConnected?: boolean }) {
             + Buat Thread
           </Link>
 
-          {user ? (
-            <div className="hidden sm:flex items-center gap-2">
-              <span className="px-3.5 py-2 rounded-full bg-fuchsia-500/15 border border-fuchsia-400/30 text-xs font-bold text-fuchsia-200">
-                @{user.username}
-              </span>
-              <form action={logoutUser}>
-                <button
-                  type="submit"
-                  className="px-3.5 py-2 rounded-full bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 text-xs font-semibold text-rose-200 transition"
-                >
-                  Logout
-                </button>
-              </form>
-            </div>
-          ) : (
-            <div className="hidden sm:flex items-center gap-2">
-              <Link
-                href="/login"
-                className="px-4 py-2 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-xs font-semibold text-white transition"
-              >
-                Login
-              </Link>
-            </div>
-          )}
+          <Suspense fallback={<NavbarUserAreaFallback />}>
+            <NavbarUserArea />
+          </Suspense>
         </div>
       </div>
     </header>
