@@ -28,7 +28,7 @@ const formatUkuran = (bytes: number): string =>
 function Penghitung({ nilai, maks }: { nilai: number; maks: number }) {
   const hampir = nilai >= maks * 0.9
   return (
-    <span className={`text-[11px] tabular-nums ${hampir ? 'text-amber-300' : 'text-slate-500'}`}>
+    <span className={`text-[11px] tabular-nums ${hampir ? 'text-amber-300' : 'text-slate-400'}`}>
       {nilai}/{maks}
     </span>
   )
@@ -211,7 +211,7 @@ export function ThreadForm({
 
   const kategoriTerpilih = kategori.find((k) => String(k.id) === values.kategoriId)
   const kelasInput = (field: FieldThread) =>
-    `w-full rounded-2xl bg-white/[0.05] border px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none transition-colors focus:bg-white/[0.08] ${
+    `w-full rounded-2xl bg-white/[0.05] border px-4 py-3 text-sm text-white placeholder:text-slate-400 outline-none transition-colors focus:bg-white/[0.08] ${
       pesan(field) ? 'border-rose-400/60 focus:border-rose-400' : 'border-white/[0.1] focus:border-fuchsia-400/60'
     }`
 
@@ -224,8 +224,8 @@ export function ThreadForm({
         className="lg:col-span-2 space-y-6 backdrop-blur-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/[0.09] border-t-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl"
       >
         {draftDipulihkan && (
-          <div className="flex items-center justify-between gap-3 rounded-2xl bg-amber-500/10 border border-amber-400/25 px-4 py-3 text-xs text-amber-200">
-            <span>📝 Draf terakhirmu dipulihkan otomatis.</span>
+          <div role="status" className="flex items-center justify-between gap-3 rounded-2xl bg-amber-500/10 border border-amber-400/25 px-4 py-3 text-xs text-amber-200">
+            <span>Draf terakhirmu dipulihkan otomatis.</span>
             <button type="button" onClick={hapusDraft} className="font-semibold underline hover:text-white">
               Hapus draf
             </button>
@@ -358,7 +358,7 @@ export function ThreadForm({
                   )}
                 </>
               ) : (
-                <p className="text-sm text-slate-500 italic">Belum ada yang bisa dipratinjau.</p>
+                <p className="text-sm text-slate-400 italic">Belum ada yang bisa dipratinjau.</p>
               )}
             </div>
           )}
@@ -368,7 +368,7 @@ export function ThreadForm({
         {/* Gambar (opsional) */}
         <div>
           <label htmlFor="field-gambar" className="block text-sm font-semibold text-slate-200 mb-2">
-            Gambar <span className="font-normal text-slate-500">(opsional)</span>
+            Gambar <span className="font-normal text-slate-400">(opsional)</span>
           </label>
           <input
             ref={inputGambar}
@@ -381,7 +381,7 @@ export function ThreadForm({
             aria-describedby="err-gambar info-gambar"
             className="block w-full text-sm text-slate-300 file:mr-4 file:cursor-pointer file:rounded-xl file:border file:border-white/[0.15] file:bg-white/[0.07] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-white/[0.12] rounded-2xl bg-white/[0.03] border border-dashed border-white/[0.15] p-3"
           />
-          <p id="info-gambar" className="mt-1.5 text-[11px] text-slate-500">
+          <p id="info-gambar" className="mt-1.5 text-[11px] text-slate-400">
             JPG, PNG, WebP, atau GIF. Maksimal {BATAS.gambarMaxBytes / (1024 * 1024)} MB.
           </p>
           <PesanError id="err-gambar" pesan={pesanGambar} />
@@ -395,7 +395,7 @@ export function ThreadForm({
               />
               <div className="min-w-0 flex-1 text-xs text-slate-300">
                 <p className="truncate font-semibold text-white">{gambar.name}</p>
-                <p className="mt-0.5 text-slate-500">{formatUkuran(gambar.size)}</p>
+                <p className="mt-0.5 text-slate-400">{formatUkuran(gambar.size)}</p>
                 <button
                   type="button"
                   onClick={hapusGambar}
@@ -446,7 +446,7 @@ export function ThreadForm({
             className="px-6 py-3 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-rose-400 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm shadow-lg shadow-fuchsia-600/30 transition-all active:scale-95 border border-white/25 inline-flex items-center gap-2"
           >
             {isPending && (
-              <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin"></span>
+              <span aria-hidden="true" className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin"></span>
             )}
             {isPending ? (gambar ? 'Mengunggah...' : 'Memposting...') : 'Posting Diskusi'}
           </button>
@@ -456,7 +456,7 @@ export function ThreadForm({
       {/* Sidebar tips */}
       <aside className="space-y-6">
         <div className="backdrop-blur-2xl bg-gradient-to-br from-violet-950/35 via-fuchsia-950/20 to-amber-950/15 border border-violet-400/25 rounded-3xl p-6 text-sm text-slate-300 shadow-xl">
-          <h2 className="font-bold text-white mb-3">💡 Tips diskusi yang seru</h2>
+          <h2 className="font-bold text-white mb-3">Tips diskusi yang seru</h2>
           <ul className="space-y-2.5 text-xs text-slate-300/90 leading-relaxed list-disc pl-4">
             <li>Pakai judul yang spesifik, bukan sekadar &quot;tanya dong&quot;.</li>
             <li>Sebutkan mata kuliah atau konteksnya biar mudah dijawab.</li>

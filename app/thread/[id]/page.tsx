@@ -59,7 +59,12 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
   } catch {
     return (
       <div className="max-w-3xl mx-auto text-center py-20 rounded-3xl bg-white/[0.03] border border-rose-500/30 p-8">
-        <div className="text-3xl mb-3">🔌</div>
+        <div
+          aria-hidden="true"
+          className="mx-auto mb-4 w-12 h-12 rounded-full border border-rose-400/40 bg-rose-500/10 text-rose-300 flex items-center justify-center text-xl font-black"
+        >
+          !
+        </div>
         <h1 className="font-semibold text-white mb-1">Gagal memuat diskusi</h1>
         <p className="text-sm text-slate-400 mb-5">
           Koneksi ke database bermasalah. Coba muat ulang halaman ini beberapa saat lagi.
@@ -115,13 +120,13 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
             <span className="text-sm font-semibold text-slate-200">{thread.penulis}</span>
           </span>
           <time dateTime={thread.createdAt.toISOString()} title={formatTanggalJam(thread.createdAt)}>
-            🕒 {waktuRelatif(thread.createdAt)}
+            Diposting {waktuRelatif(thread.createdAt)}
           </time>
-          <span>👁 {thread.views} dilihat</span>
-          <span>📖 {estimasiBaca(thread.konten)} menit baca</span>
+          <span>{thread.views} dilihat</span>
+          <span>{estimasiBaca(thread.konten)} menit baca</span>
         </div>
 
-        <p className="mt-1 text-[11px] text-slate-500">{formatTanggalJam(thread.createdAt)}</p>
+        <p className="mt-1 text-[11px] text-slate-400">{formatTanggalJam(thread.createdAt)}</p>
 
         <hr className="my-6 border-white/[0.08]" />
 
@@ -172,7 +177,7 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
       {/* Thread terkait */}
       <section aria-labelledby="judul-terkait" className="space-y-4">
         <h2 id="judul-terkait" className="text-lg font-bold text-white">
-          🔥 Diskusi lain di {thread.kategori.nama}
+          Diskusi lain di {thread.kategori.nama}
         </h2>
         {terkait.length > 0 ? (
           <div className="space-y-4">
@@ -181,7 +186,7 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
             ))}
           </div>
         ) : (
-          <div className="rounded-3xl bg-white/[0.03] border border-white/[0.09] p-6 text-sm text-slate-400">
+          <div className="rounded-3xl bg-white/[0.03] border border-dashed border-white/[0.15] p-6 text-sm text-slate-400">
             Belum ada diskusi lain di kategori ini.{' '}
             <Link href="/buat-thread" className="text-fuchsia-300 hover:text-amber-300 font-semibold">
               Jadi yang pertama membuat!
@@ -205,15 +210,15 @@ function ambilTerkait(kategoriId: number, kecualiId: number) {
 function ThreadSkeleton() {
   return (
     <div className="max-w-3xl mx-auto animate-pulse space-y-6" aria-busy="true">
-      <div className="h-4 w-56 rounded bg-white/10"></div>
-      <div className="rounded-3xl bg-white/[0.04] border border-white/[0.09] p-9 space-y-5">
-        <div className="h-6 w-28 rounded-xl bg-white/10"></div>
-        <div className="h-9 w-4/5 rounded bg-white/10"></div>
-        <div className="h-9 w-48 rounded bg-white/10"></div>
+      <div className="h-4 w-56 rounded bg-white/20"></div>
+      <div className="rounded-3xl bg-white/[0.06] border border-white/[0.15] p-9 space-y-5">
+        <div className="h-6 w-28 rounded-xl bg-white/20"></div>
+        <div className="h-9 w-4/5 rounded bg-white/20"></div>
+        <div className="h-9 w-48 rounded bg-white/20"></div>
         <div className="space-y-3 pt-4">
-          <div className="h-4 rounded bg-white/10"></div>
-          <div className="h-4 rounded bg-white/10"></div>
-          <div className="h-4 w-2/3 rounded bg-white/10"></div>
+          <div className="h-4 rounded bg-white/20"></div>
+          <div className="h-4 rounded bg-white/20"></div>
+          <div className="h-4 w-2/3 rounded bg-white/20"></div>
         </div>
       </div>
     </div>
