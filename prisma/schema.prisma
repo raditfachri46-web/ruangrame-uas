@@ -9,24 +9,32 @@ generator client {
 }
 
 model Kategori {
-  id        Int      @id @default(autoincrement())
-  nama      String   @unique
-  slug      String   @unique
-  threads   Thread[]
+  id      Int      @id @default(autoincrement())
+  nama    String   @unique
+  slug    String   @unique
+  threads Thread[]
 }
 
 model Thread {
-  id           Int      @id @default(autoincrement())
-  judul        String
-  konten       String
-  penulis      String
-  views        Int      @default(0)
-  gambarUrl    String?
-  gambarPath   String?
-  createdAt    DateTime @default(now())
-  
-  kategoriId   Int
-  kategori     Kategori @relation(fields: [kategoriId], references: [id])
+  id         Int       @id @default(autoincrement())
+  judul      String
+  konten     String
+  penulis    String
+  views      Int       @default(0)
+  gambarUrl  String?
+  gambarPath String?
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
+
+  kategoriId Int
+  kategori   Kategori @relation(fields: [kategoriId], references: [id])
+
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
+
+  votes    Vote[]
+  comments Comment[]
+  reports  Report[]
 }
 
 model User {
@@ -34,4 +42,109 @@ model User {
   username  String   @unique
   password  String
   createdAt DateTime @default(now())
+
+  role UserRole @default(USER)
+
+  threads  Thread[]
+  votes    Vote[]
+  comments Comment[]
+
+  reports         Report[] @relation("ReportReporter")
+  reviewedReports Report[] @relation("ReportReviewer")
+
+  notifications     Notification[] @relation("NotificationReceiver")
+  sentNotifications Notification[] @relation("NotificationActor")
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  content   String
+  userId    Int
+  threadId  Int
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  reports Report[]
+
+  @@index([threadId, createdAt])
+}
+
+model Vote {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  threadId  Int
+  value     Int      @default(1)
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, threadId])
+  @@index([threadId])
+}
+
+enum NotificationType {
+  REPLY
+  VOTE
+  MENTION
+  SYSTEM
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  actorId   Int?
+  type      NotificationType
+  message   String
+  link      String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user  User  @relation("NotificationReceiver", fields: [userId], references: [id], onDelete: Cascade)
+  actor User? @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([userId, isRead, createdAt])
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  REJECTED
+}
+
+enum ReportTarget {
+  THREAD
+  COMMENT
+}
+
+model Report {
+  id          Int          @id @default(autoincrement())
+  reporterId  Int
+  threadId    Int?
+  commentId   Int?
+  targetType  ReportTarget
+  reason      String
+  description String?
+  status      ReportStatus @default(PENDING)
+  reviewedBy  Int?
+  createdAt   DateTime     @default(now())
+  reviewedAt  DateTime?
+
+  reporter User  @relation("ReportReporter", fields: [reporterId], references: [id])
+  reviewer User? @relation("ReportReviewer", fields: [reviewedBy], references: [id])
+
+  thread  Thread?  @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
 }

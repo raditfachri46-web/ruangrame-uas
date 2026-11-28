@@ -1,4 +1,6 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
+import { NavbarUserArea, NavbarUserAreaFallback } from '@/components/NavbarUserArea'
 
 export function Navbar({ isConnected }: { isConnected?: boolean }) {
   return (
@@ -25,6 +27,9 @@ export function Navbar({ isConnected }: { isConnected?: boolean }) {
           </Link>
           <Link href="/trending-topic" className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
             Trending
+          </Link>
+          <Link href="/leaderboard" className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
+            🏆 Leaderboard
           </Link>
         </nav>
 
@@ -71,12 +76,17 @@ export function Navbar({ isConnected }: { isConnected?: boolean }) {
               <span>{isConnected ? 'Database Connected' : 'Connection Error'}</span>
             </div>
           )}
+
           <Link
             href="/buat-thread"
             className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-rose-400 text-white font-semibold text-sm shadow-lg shadow-fuchsia-600/25 transition-all active:scale-95 border border-white/25 whitespace-nowrap"
           >
             + Buat Thread
           </Link>
+
+          <Suspense fallback={<NavbarUserAreaFallback />}>
+            <NavbarUserArea />
+          </Suspense>
         </div>
       </div>
     </header>

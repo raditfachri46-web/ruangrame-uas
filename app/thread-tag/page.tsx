@@ -13,7 +13,7 @@ async function ThreadTagContent({ searchParams }: ThreadTagPageProps) {
 
   const [categories, allThreads] = await Promise.all([
     prisma.kategori.findMany({ orderBy: { id: 'asc' } }),
-    prisma.thread.findMany({ orderBy: { createdAt: 'desc' } }),
+    prisma.thread.findMany({ where: { deletedAt: null }, orderBy: { createdAt: 'desc' } }),
   ]);
 
   const categoryById = new Map(categories.map((c) => [c.id, c]));

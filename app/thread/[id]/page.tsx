@@ -8,6 +8,10 @@ import { ThreadCard } from '@/components/ThreadCard'
 import { KontenTeks } from '@/components/KontenTeks'
 import { BagikanTombol } from '@/components/BagikanTombol'
 import { ViewCounter } from '@/components/ViewCounter'
+import { VoteButton } from '@/components/VoteButton'
+import { ReportButton } from '@/components/ReportButton'
+import { CommentSection } from '@/components/CommentSection'
+import { getCurrentUser } from '@/lib/session'
 import {
   estimasiBaca,
   formatTanggalJam,
@@ -36,12 +40,22 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
 
   let thread
   let terkait: Awaited<ReturnType<typeof ambilTerkait>> = []
+  let user: Awaited<ReturnType<typeof getCurrentUser>> = null
   try {
     thread = await prisma.thread.findUnique({
-      where: { id },
-      include: { kategori: true },
+      where: { id, deletedAt: null },
+      include: {
+        kategori: true,
+        votes: { select: { userId: true } },
+        comments: {
+          where: { deletedAt: null },
+          include: { user: { select: { username: true } } },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
     })
     if (thread) terkait = await ambilTerkait(thread.kategoriId, thread.id)
+    user = await getCurrentUser()
   } catch {
     return (
       <div className="max-w-3xl mx-auto text-center py-20 rounded-3xl bg-white/[0.03] border border-rose-500/30 p-8">
@@ -143,9 +157,22 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
           >
             &larr; Kembali
           </Link>
-          <BagikanTombol judul={thread.judul} />
+          <div className="flex items-center gap-3">
+            <VoteButton
+              threadId={thread.id}
+              totalCendol={thread.votes.length}
+              sudahVote={user ? thread.votes.some((v) => v.userId === user.id) : false}
+              sudahLogin={!!user}
+            />
+            <BagikanTombol judul={thread.judul} />
+          </div>
+        </div>
+        <div className="mt-3 flex justify-end">
+          <ReportButton targetType="THREAD" threadId={thread.id} />
         </div>
       </article>
+
+      <CommentSection threadId={thread.id} komentar={thread.comments} sudahLogin={!!user} />
 
       {/* Thread terkait */}
       <section aria-labelledby="judul-terkait" className="space-y-4">
@@ -173,7 +200,7 @@ async function ThreadDetail({ params }: Pick<PageProps<'/thread/[id]'>, 'params'
 
 function ambilTerkait(kategoriId: number, kecualiId: number) {
   return prisma.thread.findMany({
-    where: { kategoriId, NOT: { id: kecualiId } },
+    where: { kategoriId, deletedAt: null, NOT: { id: kecualiId } },
     include: { kategori: true },
     orderBy: { createdAt: 'desc' },
     take: 3,

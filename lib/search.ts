@@ -45,6 +45,7 @@ export function buatWhere(q: string, kategori: string): Prisma.ThreadWhereInput 
     ],
   }))
   if (kategori) kondisi.push({ kategori: { slug: kategori } })
+  kondisi.push({ deletedAt: null })
   return { AND: kondisi }
 }
 
