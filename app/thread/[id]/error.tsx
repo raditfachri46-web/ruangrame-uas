@@ -2,19 +2,27 @@
 
 import Link from 'next/link'
 
-// Halaman error tidak memakai PageShell karena SiteHeader membaca cookie di server.
 export default function ThreadError({ reset }: { error: Error; reset: () => void }) {
   return (
-    <div className="mx-auto max-w-xl px-4 py-16 sm:px-6">
-      <h1 className="judul-lebar text-3xl">Thread gagal dimuat</h1>
-      <p className="mt-3 text-pudar">Terjadi kesalahan di server. Coba muat ulang halaman ini.</p>
-      <div className="mt-6 flex flex-wrap gap-3">
-        <button onClick={reset} className="btn-utama">
-          Muat ulang
-        </button>
-        <Link href="/" className="btn-tenang">
-          Ke beranda
-        </Link>
+    <div className="min-h-screen bg-white text-ink flex items-center justify-center px-6">
+      <div className="max-w-md text-center rounded-xl bg-white border border-coral/50 p-8">
+        <div className="text-3xl mb-3">⚠️</div>
+        <h1 className="font-bold text-ink mb-2">Terjadi kesalahan</h1>
+        <p className="text-sm text-ink/65 mb-6">Halaman diskusi gagal dimuat. Coba lagi ya.</p>
+        <div className="flex justify-center gap-3">
+          <button
+            onClick={reset}
+            className="px-5 py-2.5 rounded-lg bg-cobalt text-sm font-semibold text-white"
+          >
+            Coba lagi
+          </button>
+          <Link
+            href="/"
+            className="px-5 py-2.5 rounded-lg bg-white border border-ink/20 text-sm font-semibold text-ink"
+          >
+            Beranda
+          </Link>
+        </div>
       </div>
     </div>
   )
