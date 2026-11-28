@@ -9,6 +9,7 @@ async function TagPopularContent() {
   const [categories, threads] = await Promise.all([
     prisma.kategori.findMany({ orderBy: { id: 'asc' } }),
     prisma.thread.findMany({
+      where: { deletedAt: null },
       select: { kategoriId: true, judul: true, konten: true },
     }),
   ]);

@@ -5,12 +5,15 @@ import { connection } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ThreadCard } from '@/components/ThreadCard';
 import { logoutUser } from '@/app/actions/auth';
+import { NotificationBell } from '@/components/NotificationBell';
+import { getCurrentUser } from '@/lib/session';
 
 async function ForumContent() {
   await connection();
 
   const cookieStore = await cookies();
   const currentUser = cookieStore.get('ruangrame_user')?.value;
+  const user = await getCurrentUser();
 
   let categories: { id: number; nama: string; slug: string }[] = [];
   let threads: {
@@ -27,6 +30,7 @@ async function ForumContent() {
   try {
     categories = await prisma.kategori.findMany();
     threads = await prisma.thread.findMany({
+      where: { deletedAt: null },
       include: { kategori: true },
       orderBy: { createdAt: 'desc' },
       take: 10,
@@ -76,6 +80,20 @@ async function ForumContent() {
                 Trending
               </Link>
               <Link
+                href="/leaderboard"
+                className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all"
+              >
+                🏆 Leaderboard
+              </Link>
+              {(user?.role === 'MODERATOR' || user?.role === 'ADMIN') && (
+                <Link
+                  href="/moderasi"
+                  className="px-3.5 py-2 rounded-full text-amber-300 hover:text-amber-200 hover:bg-amber-500/10 transition-all"
+                >
+                  🛡️ Moderasi
+                </Link>
+              )}
+              <Link
                 href="/search"
                 className="px-3.5 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all"
               >
@@ -97,6 +115,8 @@ async function ForumContent() {
               />
               <span>{isConnected ? 'DB Connected' : 'DB Error'}</span>
             </div>
+
+            {user && <NotificationBell userId={user.id} />}
 
             {currentUser ? (
               <div className="flex items-center gap-2">
