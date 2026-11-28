@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { Footer } from '@/components/Footer';
 
 export interface TagItem {
   slug: string;
@@ -92,9 +93,7 @@ export default function TagPopularClient({ initialTags }: { initialTags: TagItem
         )}
       </main>
 
-      <footer className="border-t border-purple-500/20 py-6 px-5 text-center text-xs text-slate-500">
-        © 2026 RuangRame — Project Forum Diskusi Kampus.
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { ThreadCard } from '@/components/ThreadCard';
 import { logoutUser } from '@/app/actions/auth';
 import { NotificationBell } from '@/components/NotificationBell';
 import { getCurrentUser } from '@/lib/session';
+import { Footer } from '@/components/Footer';
 
 async function ForumContent() {
   await connection();
@@ -271,6 +272,8 @@ async function ForumContent() {
           </div>
         </section>
       </main>
+
+      <Footer />
     </>
   );
 }
