@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Navbar } from '@/components/Navbar'
+import { Footer } from '@/components/Footer'
 
 export function PageShell({ children }: { children: ReactNode }) {
   return (
@@ -12,9 +13,7 @@ export function PageShell({ children }: { children: ReactNode }) {
         <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
           {children}
         </main>
-        <footer className="border-t border-white/[0.07] py-6 text-center text-xs text-slate-500">
-          RuangRame &middot; Forum Diskusi Kampus
-        </footer>
+        <Footer />
       </div>
     </div>
   )
