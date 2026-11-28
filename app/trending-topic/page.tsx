@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Footer } from '@/components/Footer';
 
 interface TrendingItem {
   slug: string;
@@ -163,9 +164,7 @@ async function TrendingTopicContent() {
         </section>
       </main>
 
-      <footer className="border-t border-purple-500/20 py-6 px-5 text-center text-xs text-slate-500">
-        © 2026 RuangRame — Project Forum Diskusi Kampus.
-      </footer>
+      <Footer />
     </div>
   );
 }
